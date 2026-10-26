@@ -271,7 +271,7 @@
       log(ctx, `☀️ ${p.name}: あの夏は終わらない！支払い ${(-delta).toLocaleString()}M は免除`);
       return 0;
     }
-    if (delta < 0 && !opts.buy && !opts.guarded) ctx.lastLoss = { pi, to: -1, amount: -delta };
+    if (delta < 0 && !opts.buy && !opts.guarded) { ctx.lastLoss = { pi, to: -1, amount: -delta }; p.lastPay = null; }
     p.money += delta;
     fx(ctx, { t: 'money', p: pi, delta }, true);
     if (delta < 0 && !opts.buy && !opts.noSkill) lossCheck(ctx, pi);
@@ -285,6 +285,7 @@
     if (fumineGuard(ctx, from, amount)) return 0;
     const toOk = to >= 0 && !s.players[to].bankrupt;
     ctx.lastLoss = { pi: from, to: toOk ? to : -1, amount }; // 具現化の「支払いキャンセル」用
+    fp.lastPay = { to: toOk ? to : -1, amount }; // 破産した時に「払いすぎ」を戻す用
     fx(ctx, { t: 'transfer', from, to: toOk ? to : -1, amount, why });
     addMoney(ctx, from, -amount, { guarded: true });
     if (toOk) addMoney(ctx, to, amount, { noSkill: true });
@@ -758,6 +759,18 @@
   function bankrupt(ctx, pi) {
     const s = ctx.s, p = s.players[pi];
     if (p.fx.noBankrupt) { log(ctx, `${p.name}: あの夏は終わらない！破産免除☀️`); return; }
+    // 払えなかった分は受け取った人から戻す：受け取れるのは「払った人の総資産（所持金＋残った物件の売値）」まで
+    const short = -p.money, L = p.lastPay;
+    if (short > 0 && L && L.to >= 0 && !s.players[L.to].bankrupt) {
+      const cover = ownedIds(s, pi).reduce((a, id) => a + sellPrice(s, id), 0);
+      const back = Math.min(L.amount, Math.max(0, short - cover), Math.max(0, s.players[L.to].money));
+      if (back > 0) {
+        s.players[L.to].money -= back; // 返金（あの夏などの免除は受けない）
+        log(ctx, `💸 ${s.players[L.to].name}: ${p.name}は総資産以上は払えないため ${back.toLocaleString()}M を返金`);
+      }
+    }
+    p.lastPay = null;
+    if (p.money < 0) p.money = 0;
     p.bankrupt = true;
     log(ctx, `💀 ${p.name} 破産！`);
     fx(ctx, { t: 'bankrupt', p: pi });
