@@ -1271,7 +1271,15 @@
     NET.broadcast({ t: 'start', state: S, seats: NET.seats });
     beginGame(true).then(next);
   }
-  $('btn-mp-solo').onclick = () => { if (!lobbyMode) setTab(false); };
+  // 「ひとりで遊ぶ」：作った部屋を閉じて、ひとり用の選択に戻る
+  $('btn-mp-solo').onclick = () => {
+    if (lobbyMode) {
+      NET.leave(); lobbyMode = false;
+      $('mp-invite').hidden = true; $('btn-mp-start').hidden = true; $('mp-members').innerHTML = ''; lobbyStatus('');
+      document.querySelectorAll('#char-select-grid .char-card').forEach((c) => c.classList.remove('mp-mine', 'mp-taken'));
+    }
+    setTab(false);
+  };
   $('btn-mp-host').onclick = enterHost;
   $('btn-mp-start').onclick = startOnline;
   $('btn-mp-copy').onclick = () => { const i = $('mp-link'); i.select(); try { navigator.clipboard.writeText(i.value); } catch (e) { document.execCommand('copy'); } $('btn-mp-copy').textContent = 'コピーしました'; setTimeout(() => ($('btn-mp-copy').textContent = 'コピー'), 1500); };

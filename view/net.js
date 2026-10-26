@@ -146,6 +146,8 @@
       }, () => N.emit('hostLost'), (err) => N.emit('error', err));
     },
     sendAct(action) { if (N.mode === 'client') N._t.send({ t: 'act', cid: N.cid, action }); },
+    // 部屋をやめる（親が閉じると、入っていた人には「接続が切れました」と出る）
+    leave() { try { N._t && N._t.destroy(); } catch (e) { /* 無視 */ } N._t = null; N.mode = null; N.code = null; N.lobby = null; N._conns = {}; N.seats = {}; N.seat = -1; },
   };
   GR.net = N;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
