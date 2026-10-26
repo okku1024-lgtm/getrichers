@@ -1073,7 +1073,7 @@
       const S2 = K.BALANCE.stats;
       const info = {
         start: `通過すると +${M(K.BALANCE.salary)} とイベントカード1枚。ぴったり止まると手札が上限まで埋まる。`,
-        study: `止まると${Math.round(S2.passRate * 3)}/3の確率で単位取得 → ${d.name}+1（上限${S2.max}）。あなたの${d.name}は今 ${me ? R.stat(me, d.stat) : '-'}。`,
+        study: `止まると 1/4で落単（上がらない）・2/4で${d.name}+1・1/4で${d.name}+2（上限${S2.max}）。あなたの${d.name}は今 ${me ? R.stat(me, d.stat) : '-'}。`,
         lab: `止まると全ステータスが+1（確実・上限${S2.max}）。`,
         island: '止まるとその場で1回休み。',
         travel: '止まると好きなマスへ移動できる。',

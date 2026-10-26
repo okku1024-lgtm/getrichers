@@ -439,16 +439,19 @@
         push(s, ...END); return;
       }
       case 'study': {
-        // 科目マス：passRate の確率で単位取得（ステータス+1）。落単したら上がらないだけ
+        // 科目マス：studyOdds の確率で 落単（上がらない）／+1／+2（優）。上限あり
         const key = d.stat, nm = statName(key), S = C().BALANCE.stats, before = stat(p, key);
+        const O = S.studyOdds || { fail: 0.25, plus1: 0.5, plus2: 0.25 }, r = rand(s);
+        const gain = r < O.fail ? 0 : r < O.fail + O.plus1 ? 1 : 2;
         if (before >= S.max) {
           log(ctx, `📚 ${p.name}: ${nm}はもう最高（${S.max}）`);
           banner(ctx, `${nm}はもう満点！`, `${nm} ${before}（最高）`, 'info', pi);
-        } else if (rand(s) < S.passRate) {
-          statUp(ctx, pi, key);
-          log(ctx, `📚 ${p.name}: ${nm}の単位取得！ ${nm} ${before}→${before + 1}`);
-          banner(ctx, '単位取得！', `${nm} ${before} → ${before + 1}`, 'good', pi);
-          fx(ctx, { t: 'stat', p: pi, key, from: before, to: before + 1 }, true);
+        } else if (gain > 0) {
+          for (let k = 0; k < gain; k++) statUp(ctx, pi, key);
+          const after = stat(p, key);
+          log(ctx, `📚 ${p.name}: ${nm}の単位取得${gain >= 2 ? '（優）' : ''}！ ${nm} ${before}→${after}`);
+          banner(ctx, gain >= 2 ? '優で単位取得！！' : '単位取得！', `${nm} ${before} → ${after}`, gain >= 2 ? 'gold' : 'good', pi);
+          fx(ctx, { t: 'stat', p: pi, key, from: before, to: after }, true);
         } else {
           log(ctx, `📚 ${p.name}: ${nm}を落単…（${nm} ${before}のまま）`);
           banner(ctx, '落単…', `${nm}は上がらなかった`, 'bad', pi);
