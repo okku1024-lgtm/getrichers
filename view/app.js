@@ -1386,6 +1386,21 @@
   // ================= 起動 =================
   buildDie($('die1')); buildDie($('die2'));
   initCharSelect();
+  // タイトル画面：タップでキャラ選択へ（招待リンクで開いた時は出さない）
+  (function initTitle() {
+    const ov = $('title-ov'); if (!ov) return;
+    $('title-logo').src = K.IMAGES.title; if ($('char-select-logo')) $('char-select-logo').src = K.IMAGES.title;
+    if (NET.roomFromUrl()) { ov.remove(); return; }
+    let gone = false;
+    const go = () => {
+      if (gone) return; gone = true;
+      AU.start();
+      ov.classList.add('out');
+      setTimeout(() => ov.remove(), 650);
+    };
+    ov.addEventListener('pointerup', go);
+    addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'Enter') go(); }, { once: true });
+  })();
   { const rc = NET.roomFromUrl(); if (rc) waitNet(() => enterJoin(rc)); } // 招待リンク（?room=…）で開いたら、その部屋に入る
   initDebug();
   initBoardSize();

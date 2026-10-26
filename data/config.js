@@ -237,7 +237,7 @@
     { id: 'donate', name: '寄付', icon: '💸', desc: '所持金の10%を他の全員に分配', rate: 0.1, weight: 1, tone: 'bad' },
   ];
 
-  const IMAGES = { quake: ASSET + 'quake.jpg', roof: ASSET + 'event_roof.jpg?v=2', background: ASSET + 'background.jpg' };
+  const IMAGES = { quake: ASSET + 'quake.jpg', roof: ASSET + 'event_roof.jpg?v=2', background: ASSET + 'background.jpg', title: ASSET + 'title_s.png?v=1' };
   // 四隅の特別なマスの絵（マスの種類 → 画像。背景が透明な切り抜き）
   const CORNER_IMG = { start: ASSET + 'masu_start_s.png?v=2', lab: ASSET + 'masu_kenkyuutou_s.png', island: ASSET + 'masu_sekkeikadai_s.png', travel: ASSET + 'masu_shikichichousa_s.png' };
 
