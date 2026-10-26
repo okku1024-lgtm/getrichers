@@ -1386,27 +1386,51 @@
   // ================= 起動 =================
   buildDie($('die1')); buildDie($('die2'));
   initCharSelect();
-  // タイトル画面：タップでキャラ選択へ（招待リンクで開いた時は出さない）
+  // タイトル画面：まず必要な画像を読み込んで（ロード画面）、終わってからロゴの演出 → タップでキャラ選択へ
+  //   招待リンクで開いた時もタイトルから。部屋への参加は裏で進めておく
   (function initTitle() {
-    const ov = $('title-ov'); if (!ov) return;
-    $('title-logo').src = K.IMAGES.title; if ($('char-select-logo')) $('char-select-logo').src = K.IMAGES.title;
-    if (NET.roomFromUrl()) { ov.remove(); return; }
-    let gone = false;
+    const ov = $('title-ov'); if (!ov) { preloadSprites(); return; }
+    const room = NET.roomFromUrl();
+    if (room) { const iv = $('tt-invite'); iv.textContent = `👥 部屋 ${room} に招待されています`; iv.hidden = false; }
+    // 読み込む画像：タイトル・背景・キャラの絵・コマの動き・四隅のマス（イベントの絵は後回し）
+    const urls = new Set([K.IMAGES.title, K.IMAGES.background, ...Object.values(K.CORNER_IMG || {})]);
+    Object.values(K.CHARACTERS).forEach((c) => [c.img, c.pin, c.skillImg].forEach((u) => u && urls.add(u)));
+    Object.values(K.SPRITES).forEach((c) => Object.values(c).forEach((a) => urls.add(a.src)));
+    const list = [...urls]; let done = 0, ready = false, gone = false;
+    const bar = $('tt-bar-fill'), pct = $('tt-pct');
+    const tick = () => { done++; const v = Math.round((done / list.length) * 100); bar.style.width = v + '%'; pct.textContent = v + '%'; if (done >= list.length) finish(); };
+    const load = (u) => new Promise((res) => {
+      const im = new Image(); let ok = false; const end = () => { if (!ok) { ok = true; res(); } };
+      im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(end); // 先に絵をほどいておく（ゲーム中のカクつき防止）
+      im.onerror = end; im.src = u; setTimeout(end, 15000);
+    });
+    // 同時に読み込みすぎると遅くなるので4本ずつ
+    let idx = 0; const worker = () => (idx < list.length ? load(list[idx++]).then(tick).then(worker) : null);
+    for (let k = 0; k < 4; k++) worker();
+    setTimeout(finish, 20000); // 電波が悪くても20秒で進める
+    function finish() {
+      if (ready) return; ready = true;
+      $('title-logo').src = K.IMAGES.title; if ($('char-select-logo')) $('char-select-logo').src = K.IMAGES.title;
+      requestAnimationFrame(() => ov.classList.add('ready'));
+      // イベントの絵は、タイトルを出した後にゆっくり読み込む
+      const ev = K.EVENTS.map((e) => e.img).filter(Boolean); let j = 0;
+      const lazy = () => { if (j < ev.length) load(ev[j++]).then(() => setTimeout(lazy, 120)); };
+      setTimeout(lazy, 1500);
+    }
     const go = () => {
-      if (gone) return; gone = true;
+      if (!ready || gone) return; gone = true;
       AU.start();
       ov.classList.add('out');
       setTimeout(() => ov.remove(), 650);
     };
     ov.addEventListener('pointerup', go);
-    addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'Enter') go(); }, { once: true });
+    addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'Enter') go(); });
   })();
-  { const rc = NET.roomFromUrl(); if (rc) waitNet(() => enterJoin(rc)); } // 招待リンク（?room=…）で開いたら、その部屋に入る
+  { const rc = NET.roomFromUrl(); if (rc) waitNet(() => enterJoin(rc)); } // 招待リンク（?room=…）で開いたら、その部屋に入る（タイトルの裏で）
   initDebug();
   initBoardSize();
   FX.init(speed);
   ACT.init({ board: $('board-rotated'), cpos, speed });
-  preloadSprites();
   // 盤面の中央（コントロール部分と図面）をタップするとサイコロが止まる。スペースキーでも可
   // 指を離した瞬間（クリックを離した瞬間）に止める。押し始めもゲージが回っている間に限る
   let pressArmed = false;
