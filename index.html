@@ -4,20 +4,37 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>ゲットリッチ復活</title>
+<title>ゲットリッチ復活 v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+1+Code:wght@500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=85">
-<link rel="stylesheet" href="fx.css?v=85">
-<link rel="stylesheet" href="board.css?v=85">
-<style>:root{color-scheme:dark}body{background-color:#06030f;color:#eee;margin:0}</style>
+<link rel="stylesheet" href="style.css?v=86">
+<link rel="stylesheet" href="fx.css?v=86">
+<link rel="stylesheet" href="board.css?v=86">
 </head>
 <body>
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+</head><body>
 <!-- 画面の骨組みだけ。ボタンの動作は view/app.js で結びつける（HTMLからルールを直接呼ばない） -->
 <div id="char-select-ov">
   <div id="char-select-title">CHARACTER SELECT</div>
   <div id="char-select-sub">プレイするキャラクターを選んでください</div>
   <button id="btn-rules-top" type="button">📖 ルールブックを読む</button>
+  <!-- 友達対戦：部屋を作る／入る -->
+  <div id="mp-bar">
+    <button id="btn-mp-solo" class="mp-tab on" type="button">🤖 ひとりで遊ぶ</button>
+    <button id="btn-mp-host" class="mp-tab" type="button">👥 友達と遊ぶ（部屋を作る）</button>
+  </div>
+  <div id="mp-lobby" hidden>
+    <div id="mp-status"></div>
+    <div id="mp-invite" hidden>
+      <div class="mp-lbl">このリンクを友達に送ってください</div>
+      <div class="mp-linkrow"><input id="mp-link" readonly><button id="btn-mp-copy" type="button">コピー</button><button id="btn-mp-share" type="button">送る</button></div>
+    </div>
+    <div id="mp-members"></div>
+    <div id="mp-help">使うキャラをタップして選んでください（もう一度タップで取り消し）。空いたキャラはCPUが動かします。</div>
+    <button id="btn-mp-start" class="primary" type="button" hidden>ゲーム開始</button>
+  </div>
   <div id="char-select-grid"></div>
 </div>
 <div id="quake-banner"></div>
@@ -103,15 +120,18 @@
 </div>
 
 <!-- 読み込み順：設定表 → ルール → CPU → 画面 -->
-<script charset="utf-8" src="data/config.js?v=85"></script>
-<script charset="utf-8" src="rules/engine.js?v=85"></script>
-<script charset="utf-8" src="rules/ai.js?v=85"></script>
-<script charset="utf-8" src="view/audio.js?v=85"></script>
-<script charset="utf-8" src="view/fx.js?v=85"></script>
-<script charset="utf-8" src="view/actors.js?v=85"></script>
-<script charset="utf-8" src="view/blueprint.js?v=85"></script>
-<script charset="utf-8" src="view/rulebook.js?v=85"></script>
-<script charset="utf-8" src="view/app.js?v=85"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';document.head.appendChild(s)"></script>
+<script charset="utf-8" src="data/config.js?v=86"></script>
+<script charset="utf-8" src="rules/engine.js?v=86"></script>
+<script charset="utf-8" src="rules/ai.js?v=86"></script>
+<script charset="utf-8" src="view/audio.js?v=86"></script>
+<script charset="utf-8" src="view/fx.js?v=86"></script>
+<script charset="utf-8" src="view/actors.js?v=86"></script>
+<script charset="utf-8" src="view/blueprint.js?v=86"></script>
+<script charset="utf-8" src="view/rulebook.js?v=86"></script>
+<script charset="utf-8" src="view/net.js?v=86"></script>
+<script charset="utf-8" src="view/app.js?v=86"></script>
+</body></html>
 
 </body>
 </html>

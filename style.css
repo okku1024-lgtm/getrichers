@@ -1,5 +1,5 @@
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:sans-serif;background:radial-gradient(circle at 50% 30%,rgba(10,20,50,.18) 0%,rgba(6,10,30,.5) 80%),url('assets/background.jpg') center/cover no-repeat fixed;color:#eee;min-height:100vh}
+body{font-family:sans-serif;background:radial-gradient(circle at 50% 30%,rgba(10,20,50,.18) 0%,rgba(6,10,30,.5) 80%),url('../assets/background.jpg') center/cover no-repeat fixed;color:#eee;min-height:100vh}
 #root{max-width:1000px;margin:0 auto;padding:8px}
 
 /* 全体レイアウト */
