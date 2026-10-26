@@ -154,7 +154,7 @@
     'おくだ': {
       color: '#D4B800', img: ASSET + 'char_okuda.jpg', pin: ASSET + 'pin_okuda.png', skillImg: ASSET + 'skill_okuda_s.png',
       stats: { plan: 6, equip: 4, struct: 4, mat: 3 },
-      skill: { id: 'tabidachi', title: '突然の旅立ち', desc: '銀行から旅費+1000Mをもらい、角以外の好きなマスへワープ。ターンの最初に使えば、そのあとサイコロも振れる', bankGain: 1000, gaugeRate: 0.25 },
+      skill: { id: 'tabidachi', title: '突然の旅立ち', desc: '銀行から旅費+1000Mをもらい、角以外の好きなマスへワープ。ターンの最初に使えば、そのあとサイコロも振れる', bankGain: 1000, gaugeRate: 0.325 },
     },
   };
   const CHAR_ORDER = ['さこう', 'さだ', 'すぎうら', 'おくだ'];
