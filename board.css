@@ -1,0 +1,130 @@
+/* =====================================================================
+   盤面の「図面」デザイン（建築学科テイスト：青焼き図面・白模型・付箋・印紙）
+   ===================================================================== */
+:root{
+  --bp-paper:#15407f;      /* 青焼きの紙 */
+  --bp-paper-2:#0e2d63;
+  --bp-line:rgba(214,232,255,.85);
+  --bp-grid:rgba(190,215,255,.09);
+  --bp-ink:#eaf3ff;
+  --bp-red:#ff7a7a;        /* 敷地境界線・通り芯の赤 */
+  --bp-font:'M PLUS 1 Code','BIZ UDGothic','Osaka-Mono',monospace;
+}
+#board-sheet{position:absolute;inset:0;pointer-events:none;z-index:0}
+#board-sheet .bp-sheet{display:block;filter:drop-shadow(0 6px 18px rgba(0,0,0,.6))}
+.bp-t{fill:var(--bp-line);font-family:var(--bp-font)}
+
+/* --- マス共通：青焼きの紙＋方眼 --- */
+#board-rotated .cell{
+  background:
+    linear-gradient(var(--bp-grid) 1px,transparent 1px) 0 0/6px 6px,
+    linear-gradient(90deg,var(--bp-grid) 1px,transparent 1px) 0 0/6px 6px,
+    linear-gradient(160deg,#1c4a96,var(--bp-paper-2));
+  border:1px solid rgba(200,225,255,.6);
+  border-radius:2px;
+  box-shadow:0 6px 0 -1px #08193b,0 11px 14px -4px rgba(0,0,0,.75),inset 0 0 0 2px rgba(255,255,255,.04);
+}
+#board-rotated .cell.prop:hover{box-shadow:0 10px 0 -1px #08193b,0 16px 18px -4px rgba(0,0,0,.75),0 0 14px 2px rgba(143,227,255,.55)}
+/* 物件マス：内側に敷地境界線（赤の破線） */
+#board-rotated .cell.prop::after{content:'';position:absolute;inset:7px 4px 4px;border:1px dashed rgba(255,130,130,.55);border-radius:1px;pointer-events:none;z-index:1}
+/* 色の帯は用途地域図のようなハッチング */
+#board-rotated .cbar{background:repeating-linear-gradient(45deg,currentColor 0 1.6px,transparent 1.6px 3.6px)!important;box-shadow:inset 0 0 0 1px currentColor,0 0 6px currentColor!important;opacity:.95}
+/* 独占：その色で薄く塗りつぶし */
+#board-rotated .cell.mono{
+  background:
+    linear-gradient(color-mix(in srgb,var(--mono) 26%,transparent),color-mix(in srgb,var(--mono) 26%,transparent)),
+    linear-gradient(var(--bp-grid) 1px,transparent 1px) 0 0/6px 6px,
+    linear-gradient(90deg,var(--bp-grid) 1px,transparent 1px) 0 0/6px 6px,
+    linear-gradient(160deg,#1c4a96,var(--bp-paper-2));
+  box-shadow:0 6px 0 -1px #08193b,0 11px 14px -4px rgba(0,0,0,.75),inset 0 0 0 1.5px var(--mono);
+}
+
+/* 文字は製図風の等幅 */
+#board-rotated .cname{font-family:var(--bp-font);font-weight:700;font-size:7.5px;color:var(--bp-ink);letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+#board-rotated .csub{font-family:var(--bp-font);font-size:5.5px;color:#ffe9a6;font-weight:500;text-shadow:none}
+.cspec{font-family:var(--bp-font);font-size:5px;color:rgba(214,232,255,.72);letter-spacing:.3px;z-index:2;margin-top:1px}
+#board-rotated .cell-icon{color:#dbe9ff;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5));margin-bottom:1px}
+#board-rotated .cell-icon svg{width:14px;height:14px;display:block}
+
+/* 隅のマス：図面枠のような二重線 */
+#board-rotated .corner-cell{border:1px solid var(--bp-line)!important;box-shadow:0 8px 0 -1px #08193b,0 14px 18px -4px rgba(0,0,0,.8),inset 0 0 0 3px rgba(21,64,127,1),inset 0 0 0 3.6px var(--bp-line)}
+#board-rotated .corner-cell .cell-icon svg{width:18px;height:18px}
+#board-rotated .corner-cell .cname{font-size:8.5px}
+
+/* START：赤い「着工」の印 */
+.cstamp{font-family:'Dela Gothic One',var(--bp-font);font-size:8px;color:#ff5a5a;border:1.5px solid #ff5a5a;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg);margin-bottom:1px;box-shadow:0 0 0 1px rgba(255,90,90,.35);opacity:.92;z-index:2;letter-spacing:-1px}
+/* スチノリ地獄：徹夜の夜の色 */
+#board-rotated .island-cell{background:linear-gradient(var(--bp-grid) 1px,transparent 1px) 0 0/6px 6px,linear-gradient(90deg,var(--bp-grid) 1px,transparent 1px) 0 0/6px 6px,linear-gradient(160deg,#2a2457,#120f2c)}
+#board-rotated .island-cell .cell-icon{color:#ffe14d}
+/* 地震：地震計の赤い波 */
+#board-rotated .quake-cell .cell-icon{color:#ff8a6a}
+/* 世界旅行：空色の航路 */
+#board-rotated .travel-cell .cell-icon{color:#8fe3ff}
+
+/* チャンス：黄色い付箋（角が少し折れている） */
+#board-rotated .chance-cell{background:linear-gradient(170deg,#fff27a,#f3cf3a);border:none;box-shadow:0 6px 0 -1px #8a6d00,0 10px 12px -4px rgba(0,0,0,.7)}
+#board-rotated .chance-cell::before{content:'';position:absolute;right:0;bottom:0;width:10px;height:10px;background:linear-gradient(135deg,#d9b21c 50%,transparent 50%);z-index:2}
+#board-rotated .chance-cell .cname{color:#4a3500;text-shadow:none}
+#board-rotated .chance-cell .cell-icon{color:#6b4e00;filter:none}
+
+/* 税：収入印紙（ミシン目の縁＋朱色） */
+#board-rotated .tax-cell{background:radial-gradient(circle at 50% 45%,#fff3ee,#f4d8cf);border:2px dotted #c95b4a;box-shadow:0 6px 0 -1px #6e2a20,0 10px 12px -4px rgba(0,0,0,.7)}
+#board-rotated .tax-cell .cname{color:#a3261b;text-shadow:none}
+#board-rotated .tax-cell .csub{color:#a3261b}
+#board-rotated .tax-cell .cell-icon{color:#c0392b;filter:none}
+
+/* 観光地：名建築（緑がかった青焼き） */
+#board-rotated .tourist-cell{background:linear-gradient(var(--bp-grid) 1px,transparent 1px) 0 0/6px 6px,linear-gradient(90deg,var(--bp-grid) 1px,transparent 1px) 0 0/6px 6px,linear-gradient(160deg,#16706a,#0b3f45)}
+#board-rotated .tourist-cell .cell-icon{color:#bfffe9}
+
+/* 建物（白模型）の影 */
+#board-rotated .cbld-wrap{filter:drop-shadow(0 3px 3px rgba(0,0,0,.6))}
+
+/* 通行料2倍（独占）のマス：金色に脈打つ枠＋「×2」の金バッジ */
+#board-rotated .cell.mono{animation:monoGlow 1.6s ease-in-out infinite;border-color:#ffd23f!important}
+@keyframes monoGlow{
+  0%,100%{box-shadow:0 6px 0 -1px #08193b,0 11px 14px -4px rgba(0,0,0,.75),inset 0 0 0 2px var(--mono),0 0 0 1.5px #ffd23f,0 0 8px 1px rgba(255,210,63,.55)}
+  50%{box-shadow:0 6px 0 -1px #08193b,0 11px 14px -4px rgba(0,0,0,.75),inset 0 0 0 2px var(--mono),0 0 0 2.5px #ffe680,0 0 18px 5px rgba(255,210,63,.95)}}
+#board-rotated .cell.mono .x2{display:inline-block;margin-top:2px;padding:1px 5px;border-radius:7px;font:900 10px/1.1 'Dela Gothic One',sans-serif;color:#3a2200;
+  background:linear-gradient(180deg,#fff27a,#ffb300);box-shadow:0 0 0 1px #fff,0 0 8px rgba(255,210,63,.95);text-shadow:none;animation:x2Pop 1.6s ease-in-out infinite}
+@keyframes x2Pop{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+#board-rotated .cell.mono.step-on,#board-rotated .cell.mono.land-on{animation:none}
+#board-rotated .cell.mono.step-on,#board-rotated .cell.mono.land-on{box-shadow:0 0 0 3px var(--pc,#fff),0 0 18px 4px var(--pc,#fff),0 14px 0 -2px rgba(0,0,0,.55),inset 0 0 24px rgba(255,255,255,.55)}
+#board-rotated .cell.mono{transform:translateZ(9px);overflow:visible}
+#board-rotated .cell .x2b{position:absolute;right:-6px;top:-6px;z-index:6;transform:rotate(-45deg);padding:1px 5px;border-radius:8px;
+  font:900 11px/1.15 'Dela Gothic One',sans-serif;color:#3a2200;background:linear-gradient(180deg,#fff27a,#ffb300);
+  box-shadow:0 0 0 1.5px #fff,0 0 10px 2px rgba(255,210,63,.95);animation:x2b 1.6s ease-in-out infinite;pointer-events:none}
+@keyframes x2b{0%,100%{transform:rotate(-45deg) scale(1)}50%{transform:rotate(-45deg) scale(1.2)}}
+
+/* マス数を減らしてマスが広くなった分、文字とアイコンを大きく（24マス） */
+#board-rotated .cname{font-size:10px}
+#board-rotated .csub{font-size:7px}
+#board-rotated .cspec{font-size:6.5px}
+#board-rotated .cell-icon svg{width:19px;height:19px}
+
+/* --- 科目マス（計画・設備・構造・材料）：本そのものがマス。表紙・背表紙・ページの小口・しおり --- */
+#board-rotated .cell.book{background:linear-gradient(155deg,#fff59a 0%,#f7d84a 45%,#e9bf22 100%);border:none;border-radius:3px 7px 7px 3px;
+  box-shadow:0 6px 0 -1px #8a6d00,0 10px 12px -4px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.35),inset 0 -6px 10px -6px rgba(120,80,0,.45);overflow:visible}
+#board-rotated .cell.book::before{display:none}
+#board-rotated .cell.book .book-spine{position:absolute;z-index:2;pointer-events:none}
+#board-rotated .cell.book .book-pages{position:absolute;z-index:2;pointer-events:none}
+#board-rotated .cell.book .book-ribbon{position:absolute;z-index:3;width:7px;height:15px;background:linear-gradient(90deg,#b8241d,#e2463c 50%,#a81f19);clip-path:polygon(0 0,100% 0,100% 100%,50% 72%,0 100%);pointer-events:none}
+/* 横長（下・上の辺）：背表紙は左、小口は右 */
+#board-rotated .cell.book-bottom,#board-rotated .cell.book-top{padding-left:12px;padding-right:6px}
+#board-rotated .cell.book-bottom .book-spine,#board-rotated .cell.book-top .book-spine{left:0;top:0;bottom:0;width:12px;border-radius:3px 0 0 3px;
+  background:linear-gradient(180deg,transparent 16%,#ffe58a 16% 21%,transparent 21% 79%,#ffe58a 79% 84%,transparent 84%),linear-gradient(90deg,#6e4500,#c8901a 45%,#7a4e00 80%,#5a3800)}
+#board-rotated .cell.book-bottom .book-pages,#board-rotated .cell.book-top .book-pages{right:0;top:4px;bottom:4px;width:6px;border-radius:0 3px 3px 0;
+  background:repeating-linear-gradient(90deg,#fffdf3 0 1px,#d8ccae 1px 2px);box-shadow:inset 1px 0 0 rgba(0,0,0,.15)}
+#board-rotated .cell.book-bottom .book-ribbon,#board-rotated .cell.book-top .book-ribbon{right:20%;bottom:-11px}
+/* 縦長（左・右の辺）：背表紙は上、小口は下 */
+#board-rotated .cell.book-left,#board-rotated .cell.book-right{padding-top:12px;padding-bottom:6px;border-radius:3px 3px 7px 7px}
+#board-rotated .cell.book-left .book-spine,#board-rotated .cell.book-right .book-spine{left:0;right:0;top:0;height:12px;border-radius:3px 3px 0 0;
+  background:linear-gradient(90deg,transparent 16%,#ffe58a 16% 21%,transparent 21% 79%,#ffe58a 79% 84%,transparent 84%),linear-gradient(180deg,#6e4500,#c8901a 45%,#7a4e00 80%,#5a3800)}
+#board-rotated .cell.book-left .book-pages,#board-rotated .cell.book-right .book-pages{bottom:0;left:4px;right:4px;height:6px;border-radius:0 0 3px 3px;
+  background:repeating-linear-gradient(180deg,#fffdf3 0 1px,#d8ccae 1px 2px);box-shadow:inset 0 1px 0 rgba(0,0,0,.15)}
+#board-rotated .cell.book-left .book-ribbon{left:-10px;top:30%;width:15px;height:7px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,28% 50%)}
+#board-rotated .cell.book-right .book-ribbon{right:-10px;top:30%;width:15px;height:7px;clip-path:polygon(0 0,100% 0,72% 50%,100% 100%,0 100%)}
+/* 表紙のタイトル（教科書っぽい枠） */
+#board-rotated .cell.book .cname{position:relative;z-index:4;color:#3d2a00;text-shadow:none;font-size:15px;font-weight:900;letter-spacing:2px;padding:1px 7px 0;
+  border:1.5px solid #9a7400;outline:1px solid rgba(154,116,0,.45);outline-offset:2px;border-radius:2px;background:rgba(255,255,255,.35)}
+#board-rotated .cell.book .csub{position:relative;z-index:4;color:#6b4e00;text-shadow:none;margin-top:5px;font-size:8.5px;font-weight:700}
