@@ -22,7 +22,6 @@
     doublesToJail: 3,        // ゾロ目この回数連続で設計課題送り
     edgeReroll: 0.6,         // 合計2・12（必ずゾロ目）が出た時に振り直す確率
     cpuDiceExtra: 2, // CPUだけサイコロのブレ幅を足す（2 = さらに±1ずれる）
-    diceSpread: 3, // （旧）サイコロのブレ幅。今はステータス「計画」で決まる（stats.plan）
     doubleWeight: 0.4,       // ゾロ目の出やすさ（同じ合計になる組み合わせの中での重み。1=本物のサイコロと同じ）
     lapForLevel: { 1: 1, 2: 2, 3: 3 }, // 周回数→建てられる最大レベル
     oddEvenBonus: 0,         // 奇数偶数予想が当たった時のボーナス（0=ログのみ）
@@ -132,17 +131,17 @@
   // stats：ステータスの初期値（1〜10）。plan=計画 / equip=設備 / struct=構造 / mat=材料
   const CHARACTERS = {
     'さこう': {
-      color: '#2E9E55', img: ASSET + 'char_sakou.jpg', pin: ASSET + 'pin_sakou.png', skillImg: ASSET + 'skill_sakou_s.png',
+      color: '#2E9E55', img: ASSET + 'char_sakou.jpg', pin: ASSET + 'pin_sakou.webp', skillImg: ASSET + 'skill_sakou_s.png',
       stats: { plan: 4, equip: 4, struct: 3, mat: 6 },
       skill: { id: 'genjitsuka', title: '具現化', desc: '1周の間スタンバイ。所持金が0以下になったらその支払いを帳消しにし、全員から50%を奪い、建物・観光地のあるマスからランダムに3マスを建物ごと自分のものにする（自分のマスが選ばれることもある）', stealRate: 0.5, takeCells: 3, threshold: 0, gaugeRate: 0.25 },
     },
     'さだ': {
-      color: '#378ADD', img: ASSET + 'char_sada.jpg', pin: ASSET + 'pin_sada.png', skillImg: ASSET + 'skill_sada_s.png',
+      color: '#378ADD', img: ASSET + 'char_sada.jpg', pin: ASSET + 'pin_sada.webp', skillImg: ASSET + 'skill_sada_s.png',
       stats: { plan: 4, equip: 4, struct: 7, mat: 3 },
       skill: { id: 'zettaireido', title: '絶対零度', desc: '相手1人に3つのくじを順に引く。①10% 物件を半額で強制売却 ②30% 所持金を0に ③60% 自分以外が1回休み', outcomes: { sell: 0.10, zero: 0.30, island: 0.60 }, sellRate: 0.5, gaugeRate: 4.1 },
     },
     'すぎうら': {
-      color: '#E24B4A', img: ASSET + 'char_sugiura.jpg', pin: ASSET + 'pin_sugiura.png', skillImg: ASSET + 'skill_sugiura_s.png',
+      color: '#E24B4A', img: ASSET + 'char_sugiura.jpg', pin: ASSET + 'pin_sugiura.webp', skillImg: ASSET + 'skill_sugiura_s.png',
       stats: { plan: 4, equip: 6, struct: 3, mat: 3 },
       skill: { id: 'gamer', title: 'ゲーマーの意地', desc: '4つから選ぶ。①3回連続移動（通行料なし）②1周の間 追い越し略奪 ③1周の間 狙い通りの目 ④1周の間 なんでも買収', moves: 3, stealRate: 0.2, gaugeRate: 2.0,
         choices: [
@@ -153,7 +152,7 @@
         ] },
     },
     'おくだ': {
-      color: '#D4B800', img: ASSET + 'char_okuda.jpg', pin: ASSET + 'pin_okuda.png', skillImg: ASSET + 'skill_okuda_s.png',
+      color: '#D4B800', img: ASSET + 'char_okuda.jpg', pin: ASSET + 'pin_okuda.webp', skillImg: ASSET + 'skill_okuda_s.png',
       stats: { plan: 6, equip: 4, struct: 4, mat: 3 },
       skill: { id: 'tabidachi', title: '突然の旅立ち', desc: '銀行から旅費+1000Mをもらい、角以外の好きなマスへワープ。ターンの最初に使えば、そのあとサイコロも振れる', bankGain: 1000, gaugeRate: 0.325 },
     },
@@ -171,28 +170,28 @@
   // 状態: idle=待機（ループ） / move=移動（ループ） / happy=喜ぶ / sad=悲しむ（最後のコマで止まる）
   const SPRITES = {
     'さこう': {
-      idle: { src: ASSET + 'anim/sakou_idle.png', n: 4, w: 178, h: 192, ms: 1600, loop: true },
-      move: { src: ASSET + 'anim/sakou_move.png', n: 4, w: 179, h: 192, ms: 520, loop: true },
-      happy: { src: ASSET + 'anim/sakou_happy.png', n: 4, w: 179, h: 192, ms: 900, loop: false },
-      sad: { src: ASSET + 'anim/sakou_sad.png', n: 4, w: 178, h: 192, ms: 1000, loop: false },
+      idle: { src: ASSET + 'anim/sakou_idle.webp', n: 4, w: 178, h: 192, ms: 1600, loop: true },
+      move: { src: ASSET + 'anim/sakou_move.webp', n: 4, w: 179, h: 192, ms: 520, loop: true },
+      happy: { src: ASSET + 'anim/sakou_happy.webp', n: 4, w: 179, h: 192, ms: 900, loop: false },
+      sad: { src: ASSET + 'anim/sakou_sad.webp', n: 4, w: 178, h: 192, ms: 1000, loop: false },
     },
     'さだ': {
-      idle: { src: ASSET + 'anim/sada_idle.png', n: 4, w: 172, h: 192, ms: 1600, loop: true },
-      move: { src: ASSET + 'anim/sada_move.png', n: 4, w: 173, h: 192, ms: 520, loop: true },
-      happy: { src: ASSET + 'anim/sada_happy.png', n: 4, w: 173, h: 192, ms: 900, loop: false },
-      sad: { src: ASSET + 'anim/sada_sad.png', n: 4, w: 172, h: 192, ms: 1000, loop: false },
+      idle: { src: ASSET + 'anim/sada_idle.webp', n: 4, w: 172, h: 192, ms: 1600, loop: true },
+      move: { src: ASSET + 'anim/sada_move.webp', n: 4, w: 173, h: 192, ms: 520, loop: true },
+      happy: { src: ASSET + 'anim/sada_happy.webp', n: 4, w: 173, h: 192, ms: 900, loop: false },
+      sad: { src: ASSET + 'anim/sada_sad.webp', n: 4, w: 172, h: 192, ms: 1000, loop: false },
     },
     'すぎうら': {
-      idle: { src: ASSET + 'anim/sugiura_idle.png', n: 4, w: 181, h: 192, ms: 1600, loop: true },
-      move: { src: ASSET + 'anim/sugiura_move.png', n: 4, w: 181, h: 192, ms: 520, loop: true },
-      happy: { src: ASSET + 'anim/sugiura_happy.png', n: 4, w: 181, h: 192, ms: 900, loop: false },
-      sad: { src: ASSET + 'anim/sugiura_sad.png', n: 4, w: 181, h: 192, ms: 1000, loop: false },
+      idle: { src: ASSET + 'anim/sugiura_idle.webp', n: 4, w: 181, h: 192, ms: 1600, loop: true },
+      move: { src: ASSET + 'anim/sugiura_move.webp', n: 4, w: 181, h: 192, ms: 520, loop: true },
+      happy: { src: ASSET + 'anim/sugiura_happy.webp', n: 4, w: 181, h: 192, ms: 900, loop: false },
+      sad: { src: ASSET + 'anim/sugiura_sad.webp', n: 4, w: 181, h: 192, ms: 1000, loop: false },
     },
     'おくだ': {
-      idle: { src: ASSET + 'anim/okuda_idle.png', n: 28, w: 171, h: 192, ms: 3360, loop: true },
-      move: { src: ASSET + 'anim/okuda_move.png', n: 28, w: 171, h: 192, ms: 1680, loop: true },
-      happy: { src: ASSET + 'anim/okuda_happy.png', n: 28, w: 171, h: 192, ms: 1400, loop: false },
-      sad: { src: ASSET + 'anim/okuda_sad.png', n: 28, w: 171, h: 192, ms: 1600, loop: false },
+      idle: { src: ASSET + 'anim/okuda_idle.webp', n: 28, w: 171, h: 192, ms: 3360, loop: true },
+      move: { src: ASSET + 'anim/okuda_move.webp', n: 28, w: 171, h: 192, ms: 1680, loop: true },
+      happy: { src: ASSET + 'anim/okuda_happy.webp', n: 28, w: 171, h: 192, ms: 1400, loop: false },
+      sad: { src: ASSET + 'anim/okuda_sad.webp', n: 28, w: 171, h: 192, ms: 1600, loop: false },
     },
   };
 
@@ -238,7 +237,7 @@
     { id: 'donate', name: '寄付', icon: '💸', desc: '所持金の10%を他の全員に分配', rate: 0.1, weight: 1, tone: 'bad' },
   ];
 
-  const IMAGES = { quake: ASSET + 'quake.jpg', roof: ASSET + 'event_roof.jpg?v=2', background: ASSET + 'background.jpg', title: ASSET + 'title_s.png?v=1' };
+  const IMAGES = { quake: ASSET + 'quake.jpg', roof: ASSET + 'event_roof.jpg?v=2', background: ASSET + 'background.webp', title: ASSET + 'title_s.png?v=1' };
   // 四隅の特別なマスの絵（マスの種類 → 画像。背景が透明な切り抜き）
   const CORNER_IMG = { start: ASSET + 'masu_start_s.png?v=2', lab: ASSET + 'masu_kenkyuutou_s.png', island: ASSET + 'masu_sekkeikadai_s.png', travel: ASSET + 'masu_shikichichousa_s.png' };
 

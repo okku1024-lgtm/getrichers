@@ -612,14 +612,6 @@
     };
     spinAnim = requestAnimationFrame(loop);
   }
-  function landDie(i, v, ms) {
-    const node = $('die' + i), r = dieRot[i], [x, y] = ROT[v];
-    r.x += (((x - r.x) % 360) + 360) % 360 + 360 * (2 + Math.floor(Math.random() * 2));
-    r.y += (((y - r.y) % 360) + 360) % 360 + 360 * (2 + Math.floor(Math.random() * 2));
-    node.style.transition = `transform ${ms / speed()}ms ease-out`;
-    requestAnimationFrame(() => (node.style.transform = `rotateX(${r.x}deg) rotateY(${r.y}deg)`));
-    return sleep(ms).then(() => { retrigger(node.parentElement, 'bounce'); AU.se('diceStop'); });
-  }
   // ゲージを止めたら：サイコロが跳ね上がり、回りながら落ちてきて、着地で目が決まる
   function tossDie(i, v, ms, delay) {
     const node = $('die' + i), wrap = node.parentElement, r = dieRot[i], [x, y] = ROT[v];
@@ -997,12 +989,6 @@
     if (!me || me.bankrupt) return '';
     const n = K.BOARD.length, d = (id - me.pos + n) % n;
     return d === 0 ? 'あなたのいるマス' : `あなたから${d}マス先`;
-  }
-  function showDistance(id) {
-    if (cellPick || !S) return;
-    const t = distText(id); if (!t) return;
-    const pt = FX.center(cellDiv(id));
-    FX.pop(pt.x, pt.y - 10, `${R.def(id).name}：${t}`, 'info', 0.8);
   }
   function showCellInfo(id) {
     if (cellPick) return;

@@ -52,8 +52,6 @@ body.late::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:4
 @keyframes dsumPop{0%{transform:scale(.3)}60%{transform:scale(1.8)}100%{transform:scale(1)}}
 
 /* 選択画面のカードを少し派手に */
-.char-card{transition:transform .15s}
-.char-card:hover{transform:none}
 
 /* ===== スマホ幅（760px以下）：パネルを上下2段、ボードを全幅に ===== */
 html,body{overflow-x:hidden}
@@ -791,7 +789,7 @@ html,body{overflow-x:hidden}
 #title-ov{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
   background:radial-gradient(ellipse at 50% 45%,#2a1b6e 0%,#140a3a 45%,#05030f 85%);transition:opacity .6s ease,transform .6s ease}
 #title-ov.out{opacity:0;transform:scale(1.08)}
-#title-ov .tt-bg{position:absolute;inset:0;background:url('assets/background.jpg') center/cover;opacity:.16}
+#title-ov .tt-bg{position:absolute;inset:0;background:url('assets/background.webp') center/cover;opacity:.16}
 #title-ov .tt-rays{position:absolute;left:50%;top:46%;width:240vmax;height:240vmax;margin:-120vmax 0 0 -120vmax;
   background:repeating-conic-gradient(from 0deg,rgba(255,214,90,.16) 0 6deg,transparent 6deg 15deg);animation:ttSpin 40s linear infinite;will-change:transform;
   -webkit-mask:radial-gradient(circle,#000 0 18%,transparent 55%);mask:radial-gradient(circle,#000 0 18%,transparent 55%)}
