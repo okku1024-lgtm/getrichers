@@ -482,7 +482,7 @@
         push(s, ...END); return;
       }
       case 'travel': {
-        const opts = C().BOARD.filter((x) => !C().CORNERS.includes(x.id) && x.id !== p.pos).map((x) => x.id);
+        const opts = travelOpts(s, pi);
         setPending(s, { kind: 'cell', purpose: 'travel', player: pi, options: opts, title: '🗺 移動先のマスを選択してください' });
         return;
       }
@@ -506,6 +506,13 @@
     const p = ctx.s.players[pi];
     log(ctx, `🎮 ${p.name}: ゲーマーの意地！${ctx.s.players[owner].name}のマスでも通行料なし`);
     banner(ctx, '通行料なし！', 'ゲーマーの意地（3回連続移動）中', 'skill', pi);
+  }
+  // 敷地調査・世界旅行の行き先：買える（購入・建て増し・買収できる）マスだけ。1つもなければ従来どおり全マス
+  function travelOpts(s, pi) {
+    const p = s.players[pi];
+    const all = C().BOARD.filter((x) => !C().CORNERS.includes(x.id) && x.id !== p.pos).map((x) => x.id);
+    const ok = all.filter((id) => buyOptions(s, pi, id));
+    return ok.length ? ok : all;
   }
   // 購入・アップグレード・買収の選択肢を作る（買えるものがなければ何もしない）
   function buyOptions(s, pi, id) {
@@ -800,7 +807,7 @@
         if (total) addMoney(ctx, pi, total);
         log(ctx, `✈️ ${p.name}: 突然の旅立ち！銀行から${total.toLocaleString()}M`);
         banner(ctx, `+${total.toLocaleString()}M！`, '好きなマスへ飛ぶ！', 'skill', pi);
-        const opts = C().BOARD.filter((x) => !C().CORNERS.includes(x.id) && x.id !== p.pos).map((x) => x.id);
+        const opts = travelOpts(s, pi);
         if (t.at === 'turnStart') {
           // ターンの最初に使用：ワープ先で購入・通行料を処理してから、サイコロを振る
           setPending(s, { kind: 'cell', purpose: 'warp', player: pi, options: opts, data: { visit: true }, title: '✈️ 突然の旅立ち：移動先を選択' });
@@ -1032,7 +1039,7 @@
       case 'bonus': addMoney(ctx, pi, ch.amount || 300); push(s, END); return;
       case 'worldcup': pick('chWorldcup', propsOf(s, pi, { mine: true }), '🏆 ワールドカップを開催する自分の物件を選択'); return;
       case 'travel': {
-        const opts = K.BOARD.filter((x) => !K.CORNERS.includes(x.id) && x.id !== p.pos).map((x) => x.id);
+        const opts = travelOpts(s, pi);
         setPending(s, { kind: 'cell', purpose: 'travel', player: pi, options: opts, title: '🗺 敷地調査：行き先を選択' });
         return;
       }
@@ -1194,7 +1201,7 @@
   // gauge: 0〜1（ゲージの停止位置）。左ほど小さい目、右ほど大きい目が出やすい
   function rollDice(s, pi, gauge, forced) {
     const p = s.players[pi];
-    const spread = statVal(p, 'plan') * steadyMul(s, pi); // 計画が高いほどブレが小さい
+    const spread = (statVal(p, 'plan') + (p.isHuman ? 0 : (C().BALANCE.cpuDiceExtra || 0))) * steadyMul(s, pi); // 計画が高いほどブレが小さい（CPUはさらに±1ブレる）
     if (forced) {
       if (forced === 2 || forced === 12) return [forced / 2, forced / 2];
       // ゾロ目にならない組み合わせで出す（例：8 → 3+5）

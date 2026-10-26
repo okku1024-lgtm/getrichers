@@ -21,6 +21,7 @@
     rentMul: 2,              // 通行料の基本倍率（物件の rent と観光地の通行料すべてに掛かる。2＝元の2倍）
     doublesToJail: 3,        // ゾロ目この回数連続で設計課題送り
     edgeReroll: 0.6,         // 合計2・12（必ずゾロ目）が出た時に振り直す確率
+    cpuDiceExtra: 2, // CPUだけサイコロのブレ幅を足す（2 = さらに±1ずれる）
     diceSpread: 3, // （旧）サイコロのブレ幅。今はステータス「計画」で決まる（stats.plan）
     doubleWeight: 0.4,       // ゾロ目の出やすさ（同じ合計になる組み合わせの中での重み。1=本物のサイコロと同じ）
     lapForLevel: { 1: 1, 2: 2, 3: 3 }, // 周回数→建てられる最大レベル
@@ -227,7 +228,7 @@
     { id: 'angel', name: '天使の加護', icon: '😇', desc: '次に払う通行料1回が無料', weight: 1, tone: 'good' },
     { id: 'coupon', name: '半額クーポン', icon: '🎟', desc: '次に払う通行料1回が半額', weight: 1, tone: 'good' },
     { id: 'worldcup', name: 'ワールドカップ開催', icon: '🏆', desc: '自分の物件1つの通行料が、次に誰かが止まるまで2倍', weight: 1, tone: 'good' },
-    { id: 'travel', name: '世界旅行', icon: '🌍', desc: '好きなマスへ移動する', weight: 1, tone: 'good' },
+    { id: 'travel', name: '世界旅行', icon: '🌍', desc: '好きなマス（買えるマス）へ移動する', weight: 1, tone: 'good' },
     { id: 'bonus', name: '臨時ボーナス', icon: '🎁', desc: '+300M', amount: 300, weight: 1, tone: 'good' },
     { id: 'swap', name: '都市交換', icon: '🔄', desc: '自分の物件1つと相手の物件1つを交換（ランドマークは対象外）', weight: 1, tone: 'skill' },
     { id: 'forceSell', name: '強制売却', icon: '💥', desc: '相手の物件1つを売却させる（ランドマークは対象外。売却額は持ち主へ）', weight: 1, tone: 'skill' },
