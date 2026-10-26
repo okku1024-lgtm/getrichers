@@ -790,7 +790,7 @@ html,body{overflow-x:hidden}
 /* ===== タイトル画面 ===== */
 #title-ov{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
   background:radial-gradient(ellipse at 50% 45%,#2a1b6e 0%,#140a3a 45%,#05030f 85%);transition:opacity .6s ease,transform .6s ease}
-#title-ov.out{opacity:0;transform:scale(1.08);pointer-events:none}
+#title-ov.out{opacity:0;transform:scale(1.08)}
 #title-ov .tt-bg{position:absolute;inset:0;background:url('assets/background.jpg') center/cover;opacity:.16}
 #title-ov .tt-rays{position:absolute;left:50%;top:46%;width:240vmax;height:240vmax;margin:-120vmax 0 0 -120vmax;
   background:repeating-conic-gradient(from 0deg,rgba(255,214,90,.16) 0 6deg,transparent 6deg 15deg);animation:ttSpin 40s linear infinite;will-change:transform;

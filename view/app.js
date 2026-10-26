@@ -1419,6 +1419,10 @@
     }
     const go = () => {
       if (!ready || gone) return; gone = true;
+      // タップの「クリック」が下のキャラ選択に突き抜けて、いきなりゲームが始まるのを防ぐ（0.8秒はクリックを受け付けない）
+      const block = (e) => { e.stopPropagation(); e.preventDefault(); };
+      addEventListener('click', block, true);
+      setTimeout(() => removeEventListener('click', block, true), 800);
       AU.start();
       ov.classList.add('out');
       setTimeout(() => ov.remove(), 650);
