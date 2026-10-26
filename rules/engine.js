@@ -689,11 +689,12 @@
     const s = ctx.s, pi = t.p, p = s.players[pi], B = C().BALANCE;
     if (p.bankrupt || p.money > B.insolventAt) return;
     if (p.fx.noBankrupt) { log(ctx, `${p.name}: あの夏は終わらない！破産免除☀️`); return; }
-    if (p.fx.genjitsuka && !t.noGen) {
+    if (p.fx.genjitsuka && !t.noGen) { // さこう「具現化」は所持金0以下で発動
       genFire(ctx, pi);
       push(s, { k: 'solvency', p: pi, noGen: true });
       return;
     }
+    if (p.money >= 0) return; // 所持金がちょうど0なら売却は不要（マイナスになった時だけ売却・破産）
     const sellable = ownedIds(s, pi);
     if (!sellable.length) { bankrupt(ctx, pi); return; }
     log(ctx, `${p.name}: 所持金不足！資産を売却してください💸`);
