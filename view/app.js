@@ -183,7 +183,7 @@
         case 'bankrupt':
           AU.se('bad'); FX.shake($('root'), 12, 600);
           ACT.sync(D);
-          await FX.banner({ text: '破産…', sub: `${D.players[e.p].name} が脱落`, tone: 'bad', face: face(e.p, 'sad'), dur: 1700, big: true });
+          await FX.banner({ text: '破産…', sub: `${D.players[e.p].name}：総資産すべて支払い（ゲームオーバー）`, tone: 'bad', face: face(e.p, 'sad'), dur: 1700, big: true });
           break;
         case 'banner':
           AU.se(e.tone === 'bad' ? 'bad' : e.tone === 'good' ? 'cash' : 'coin');

@@ -764,15 +764,12 @@
     if (short > 0 && L && L.to >= 0 && !s.players[L.to].bankrupt) {
       const cover = ownedIds(s, pi).reduce((a, id) => a + sellPrice(s, id), 0);
       const back = Math.min(L.amount, Math.max(0, short - cover), Math.max(0, s.players[L.to].money));
-      if (back > 0) {
-        s.players[L.to].money -= back; // 返金（あの夏などの免除は受けない）
-        log(ctx, `💸 ${s.players[L.to].name}: ${p.name}は総資産以上は払えないため ${back.toLocaleString()}M を返金`);
-      }
+      if (back > 0) s.players[L.to].money -= back; // 払えなかった分は受け取った人から差し引く（表示はしない）
     }
     p.lastPay = null;
     if (p.money < 0) p.money = 0;
     p.bankrupt = true;
-    log(ctx, `💀 ${p.name} 破産！`);
+    log(ctx, `💀 ${p.name}: 総資産すべて支払い破産（ゲームオーバー）`);
     fx(ctx, { t: 'bankrupt', p: pi });
     ownedIds(s, pi).forEach((id) => setCell(ctx, id, -1, 0, { noSkill: true }));
     fx(ctx, { t: 'sync' }, true);
