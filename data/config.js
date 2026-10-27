@@ -142,7 +142,7 @@
     },
     'すぎうら': {
       color: '#E24B4A', img: ASSET + 'char_sugiura.jpg', pin: ASSET + 'pin_sugiura.webp', skillImg: ASSET + 'skill_sugiura_s.png',
-      stats: { plan: 4, equip: 6, struct: 3, mat: 3 },
+      stats: { plan: 4, equip: 6, struct: 5, mat: 4 },
       skill: { id: 'gamer', title: 'ゲーマーの意地', desc: '4つから選ぶ。①3回連続移動（通行料なし）②1周の間 追い越し略奪 ③1周の間 狙い通りの目 ④1周に1回 なんでも買収', moves: 3, stealRate: 0.2, gaugeRate: 2.0,
         choices: [
           { id: 'combo', label: '3回連続移動', icon: '🏃', desc: 'このターン3回続けて動ける。通行料なし' },
