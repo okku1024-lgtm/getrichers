@@ -865,7 +865,7 @@
     const d = R.def(pd.cell), c = S.cells[pd.cell], p = S.players[pd.player];
     $('buy-title').textContent = d.name;
     const sub = $('buy-sub');
-    const subs = { tourist: ['観光地・未所有地', '#bbb'], buy: ['未所有地', '#bbb'], upgrade: ['アップグレード', '#378ADD'], acquire: [`所有: ${S.players[c.owner] ? S.players[c.owner].name : ''} — 買収（2倍）`, '#E24B4A'], mega: [`🏰なんでも買収：${S.players[c.owner] ? S.players[c.owner].name : ''}のマスを購入金額のみで建物ごと購入`, '#ffb020'] };
+    const subs = { tourist: ['観光地・未所有地', '#bbb'], buy: ['未所有地', '#bbb'], upgrade: ['アップグレード', '#378ADD'], acquire: [`所有: ${S.players[c.owner] ? S.players[c.owner].name : ''} — 買収（2倍）`, '#E24B4A'], mega: [`🏰なんでも買収：${S.players[c.owner] ? S.players[c.owner].name : ''}のマスを購入金額のみで建物ごと購入（代金は銀行へ）`, '#ffb020'] };
     sub.textContent = subs[pd.mode][0]; sub.style.color = subs[pd.mode][1];
     const box = $('buy-opts'); box.innerHTML = '';
     let sel = (pd.options.find((o) => o.ok) || {}).value;

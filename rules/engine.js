@@ -660,9 +660,9 @@
       fx(ctx, { t: 'build', p: pi, id, level: 0, mode });
     } else if (mode === 'mega') {
       const cost = invested(s, id), prev = c.owner;
-      addMoney(ctx, prev, cost); addMoney(ctx, pi, -cost, { buy: true }); setCell(ctx, id, pi, c.level, { noSkill: true });
+      addMoney(ctx, pi, -cost, { buy: true }); setCell(ctx, id, pi, c.level, { noSkill: true }); // 代金は銀行へ（元の持ち主には入らない）
       delete p.fx.megaCell;
-      log(ctx, `🏰 ${p.name}:「${d.name}」を${s.players[prev].name}から購入金額で購入 -${cost}M`);
+      log(ctx, `🏰 ${p.name}:「${d.name}」を${s.players[prev].name}から購入金額で購入 -${cost}M（代金は銀行へ）`);
       fx(ctx, { t: 'build', p: pi, id, level: c.level, mode: 'acquire', from: prev, cost });
     } else if (mode === 'acquire') {
       const cost = acquireCost(s, id, lv, pi), prev = c.owner, refund = invested(s, id);
