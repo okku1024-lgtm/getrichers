@@ -1555,7 +1555,7 @@
     // ③ さだ以外の全員が200Mをさだに払い、「スチノリハウスに捕まった!!」を手札に加える
     if (rand(s) < o.stinori) {
       hits++;
-      const pay = sk.stinoriPay || 200, card = C().EVENTS.findIndex((e) => e.id === 'stinori');
+      const pay = sk.stinoriPay || 400, card = C().EVENTS.findIndex((e) => e.id === 'stinori');
       log(ctx, `❄️ ③アタリ！さだ以外の全員が${pay}Mを払い、スチノリ地獄へ🏠`);
       banner(ctx, '③スチノリ地獄 アタリ！', `全員が${pay}M払って「スチノリハウスに捕まった!!」を手札に`, 'skill', pi);
       aliveOthers(s, pi).forEach((oi) => {
