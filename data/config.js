@@ -143,12 +143,12 @@
     'すぎうら': {
       color: '#E24B4A', img: ASSET + 'char_sugiura.jpg', pin: ASSET + 'pin_sugiura.webp', skillImg: ASSET + 'skill_sugiura_s.png',
       stats: { plan: 4, equip: 6, struct: 3, mat: 3 },
-      skill: { id: 'gamer', title: 'ゲーマーの意地', desc: '4つから選ぶ。①3回連続移動（通行料なし）②1周の間 追い越し略奪 ③1周の間 狙い通りの目 ④1周の間 なんでも買収', moves: 3, stealRate: 0.2, gaugeRate: 2.0,
+      skill: { id: 'gamer', title: 'ゲーマーの意地', desc: '4つから選ぶ。①3回連続移動（通行料なし）②1周の間 追い越し略奪 ③1周の間 狙い通りの目 ④1周に1回 なんでも買収', moves: 3, stealRate: 0.2, gaugeRate: 2.0,
         choices: [
           { id: 'combo', label: '3回連続移動', icon: '🏃', desc: 'このターン3回続けて動ける。通行料なし' },
           { id: 'steal', label: '追い越し略奪', icon: '💰', desc: '1周する間、追い越した相手の所持金20%を奪う' },
           { id: 'steady', label: '狙い通りの目', icon: '🎯', desc: '1周する間、サイコロのブレなし' },
-          { id: 'mega', label: 'なんでも買収', icon: '🏰', desc: '1周する間、ランドマーク・観光地も買収できる' },
+          { id: 'mega', label: 'なんでも買収', icon: '🏰', desc: '1周する間に1回、他人のどんなマスでも通行料なし・購入金額のみで買える' },
         ] },
     },
     'おくだ': {

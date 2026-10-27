@@ -128,7 +128,7 @@
     const ctx = boardCtx(s, pi);
     const key = ctx.win.has(pd.cell) || ctx.block.has(pd.cell);
     const reserve = key ? 0 : ctx.early ? 60 : 200;
-    if (pd.mode === 'raid') return p.money - ok[0].cost >= reserve * 0.5 ? ok[0].value : 0;
+    if (pd.mode === 'mega') return p.money - ok[0].cost >= reserve * 0.5 ? ok[0].value : 0;
     if (pd.mode === 'tourist') return p.money - ok[0].cost >= reserve ? ok[0].value : 0;
     if (pd.mode === 'acquire') {
       const o = ok.find((x) => x.value === Math.max(c.level, 1)) || ok[0];

@@ -865,11 +865,11 @@
     const d = R.def(pd.cell), c = S.cells[pd.cell], p = S.players[pd.player];
     $('buy-title').textContent = d.name;
     const sub = $('buy-sub');
-    const subs = { tourist: ['観光地・未所有地', '#bbb'], buy: ['未所有地', '#bbb'], upgrade: ['アップグレード', '#378ADD'], acquire: [`所有: ${S.players[c.owner] ? S.players[c.owner].name : ''} — 買収（2倍）`, '#E24B4A'], raid: [`🎮ゲーマーの意地：${S.players[c.owner] ? S.players[c.owner].name : ''}のマスを建物ごと購入（代金は銀行へ）`, '#ffb020'] };
+    const subs = { tourist: ['観光地・未所有地', '#bbb'], buy: ['未所有地', '#bbb'], upgrade: ['アップグレード', '#378ADD'], acquire: [`所有: ${S.players[c.owner] ? S.players[c.owner].name : ''} — 買収（2倍）`, '#E24B4A'], mega: [`🏰なんでも買収：${S.players[c.owner] ? S.players[c.owner].name : ''}のマスを購入金額のみで建物ごと購入`, '#ffb020'] };
     sub.textContent = subs[pd.mode][0]; sub.style.color = subs[pd.mode][1];
     const box = $('buy-opts'); box.innerHTML = '';
     let sel = (pd.options.find((o) => o.ok) || {}).value;
-    const rows = pd.mode === 'tourist'
+    const rows = pd.mode === 'tourist' || (pd.mode === 'mega' && d.type === 'tourist')
       ? [{ lv: 1, name: '観光地', icon: GR.blueprint.flag(p.color) }]
       : [1, 2, 3].map((lv) => ({ lv, name: K.LEVEL_NAMES[lv], icon: GR.blueprint.building(lv, p.color) })); // 盤面と同じ白模型（土台は自分の色）
     const total = () => { const o = pd.options.find((x) => x.value === sel); $('buy-total').innerHTML = `合計: <b>${o ? o.cost.toLocaleString() : 0}M</b>`; $('btn-confirm').disabled = !o || !o.ok; };
@@ -877,7 +877,7 @@
       const o = pd.options.find((x) => x.value === r.lv);
       let price;
       if (o) price = o.ok ? o.cost + 'M' : `${o.cost}M（不足）`;
-      else if (pd.mode === 'raid') price = '—';
+      else if (pd.mode === 'mega') price = '—';
       else if (pd.mode !== 'acquire' && r.lv <= c.level) price = '取得済';
       else if (r.lv > R.maxLv(p)) price = `${r.lv}周目〜`;
       else price = '買収不可';
@@ -1085,7 +1085,7 @@
     if (p.fx.typhoon) out.push(['🌀', '富の台風18号', `1周する間、通り越した相手から所持金とゲージの${Math.round((E2('typhoon').stealRate || 0) * 100)}%を奪う`]);
     if (p.fx.steady) out.push(['🎯', '狙い通りの目', '1周する間、ゲージで狙った目がそのまま出る']);
     if (p.fx.overtake) out.push(['💰', '追い越し略奪', `1周する間、追い越した相手の所持金${Math.round((K.CHARACTERS['すぎうら'].skill.stealRate || 0) * 100)}%を奪う`]);
-    if (p.fx.megaBuy) out.push(['🏰', 'なんでも買収', '1周する間、ランドマーク・観光地も買収できる']);
+    if (p.fx.megaBuy) out.push(['🏰', 'なんでも買収', '1周する間に1回、他人のマス（ランドマーク・観光地も）で通行料なし・購入金額のみで買える']);
     if (p.fx.insured) out.push(['🧯', '火災保険', '自分の建物が壊される効果を1回だけ防ぐ']);
     if (p.fx.noBankrupt) out.push(['☀️', 'あの夏は終わらない', '1周する間、支払いがすべて免除']);
     if (p.fx.genjitsuka) out.push(['💰', '具現化スタンバイ', '所持金が尽きたら具現化が発動する']);

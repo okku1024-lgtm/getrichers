@@ -491,18 +491,28 @@
         if (c.owner >= 0 && c.owner !== pi && p.fx.gamerOn && !visit) { gamerNoToll(ctx, pi, c.owner); push(s, ...END); }
         else if (c.owner < 0) push(s, { k: 'offer', p: pi, id: p.pos }, ...END);
         else if (c.owner === pi) push(s, ...END);
-        else push(s, { k: 'pay', from: pi, to: c.owner, amount: rentFor(s, p.pos, pi), why: '観光地通行料', rentCell: p.pos }, ...(p.fx.megaBuy && !visit ? [{ k: 'offer', p: pi, id: p.pos }] : []), ...END); // ゲーマーの意地（買収）中は観光地も買収できる
+        else if (p.fx.megaBuy && !visit) { megaUse(ctx, pi, p.pos); push(s, { k: 'offer', p: pi, id: p.pos }, ...END); } // なんでも買収：通行料なし・購入金額のみで買える（1周に1回）
+        else push(s, { k: 'pay', from: pi, to: c.owner, amount: rentFor(s, p.pos, pi), why: '観光地通行料', rentCell: p.pos }, ...END);
         return;
       case 'prop':
         // ゲーマーの意地（3回連続移動）中は、他人のマスでも通行料なし（買収は通常の価格で）
         if (c.owner >= 0 && c.owner !== pi && p.fx.gamerOn && !visit) { gamerNoToll(ctx, pi, c.owner); push(s, { k: 'offer', p: pi, id: p.pos }, ...END); }
         else if (c.owner === pi || c.owner < 0) push(s, { k: 'offer', p: pi, id: p.pos }, ...END);
+        else if (p.fx.megaBuy && !visit) { megaUse(ctx, pi, p.pos); push(s, { k: 'offer', p: pi, id: p.pos }, ...END); }
         else push(s, { k: 'pay', from: pi, to: c.owner, amount: rentFor(s, p.pos, pi), why: isMonopoly(s, p.pos) ? '通行料（独占×2）' : '通行料', rentCell: p.pos }, { k: 'offer', p: pi, id: p.pos }, ...END);
         return;
       default: push(s, { k: 'endTurn' });
     }
   };
 
+  // なんでも買収（すぎうら）：1周する間に1回だけ。他人のマス（ランドマーク・観光地も）に止まると通行料なし、購入金額のみで買える
+  function megaUse(ctx, pi, id) {
+    const p = ctx.s.players[pi], c = ctx.s.cells[id];
+    p.fx.megaBuy = false; if (p.fx.lapLeft) delete p.fx.lapLeft.megaBuy;
+    p.fx.megaCell = id;
+    log(ctx, `🏰 ${p.name}: なんでも買収！${ctx.s.players[c.owner].name}の「${def(id).name}」は通行料なし・購入金額のみで買える`);
+    banner(ctx, 'なんでも買収！', '通行料なし・購入金額のみで買える', 'skill', pi);
+  }
   function gamerNoToll(ctx, pi, owner) {
     const p = ctx.s.players[pi];
     log(ctx, `🎮 ${p.name}: ゲーマーの意地！${ctx.s.players[owner].name}のマスでも通行料なし`);
@@ -518,9 +528,12 @@
   // 購入・アップグレード・買収の選択肢を作る（買えるものがなければ何もしない）
   function buyOptions(s, pi, id) {
     const d = def(id), c = s.cells[id], p = s.players[pi], names = C().LEVEL_NAMES;
+    // なんでも買収：他人のマス（ランドマーク・観光地も）を購入金額（土地・建物にかかった額）だけで建物ごと買える
+    if ((d.type === 'tourist' || d.type === 'prop') && c.owner >= 0 && c.owner !== pi && (p.fx.megaCell === id || p.fx.megaBuy)) {
+      const cost = invested(s, id), lv = d.type === 'tourist' ? 1 : Math.max(c.level, 1);
+      return { mode: 'mega', options: [{ value: lv, label: d.type === 'tourist' ? '観光地' : names[lv], cost, ok: p.money >= cost }] };
+    }
     if (d.type === 'tourist') {
-      // ゲーマーの意地（買収）中：他人の観光地も通常の買収価格で買える
-      if (c.owner >= 0 && c.owner !== pi && p.fx.megaBuy) { const cost = acquireCost(s, id, 1, pi); return { mode: 'acquire', options: [{ value: 1, label: '観光地', cost, ok: p.money >= cost }] }; }
       if (c.owner >= 0) return null;
       const tc = touristCost(s, id, pi);
       return { mode: 'tourist', options: [{ value: 1, label: '観光地', cost: tc, ok: p.money >= tc }] };
@@ -536,8 +549,8 @@
       }
       return { mode: c.owner === pi ? 'upgrade' : 'buy', options };
     }
-    // 他人の物件：買収（ランドマークは不可。ゲーマーの意地（買収）中はランドマークも可。建物レベルは下げない）
-    if (c.level >= 3 && !p.fx.megaBuy) return null;
+    // 他人の物件：買収（ランドマークは不可。建物レベルは下げない）
+    if (c.level >= 3) return null;
     const from = Math.max(c.level, 1), to = Math.max(from, c.level >= 3 ? 3 : Math.min(maxLv(p), 2));
     const options = [];
     for (let lv = from; lv <= to; lv++) {
@@ -645,10 +658,11 @@
       addMoney(ctx, pi, -tc, { buy: true }); setCell(ctx, id, pi, 0);
       log(ctx, `${p.name}:「${d.name}」観光地購入 -${tc}M`);
       fx(ctx, { t: 'build', p: pi, id, level: 0, mode });
-    } else if (mode === 'raid') {
+    } else if (mode === 'mega') {
       const cost = invested(s, id), prev = c.owner;
-      addMoney(ctx, pi, -cost, { buy: true }); setCell(ctx, id, pi, c.level);
-      log(ctx, `🎮 ${p.name}:「${d.name}」を${s.players[prev].name}から購入 -${cost}M（代金は銀行へ）`);
+      addMoney(ctx, prev, cost); addMoney(ctx, pi, -cost, { buy: true }); setCell(ctx, id, pi, c.level, { noSkill: true });
+      delete p.fx.megaCell;
+      log(ctx, `🏰 ${p.name}:「${d.name}」を${s.players[prev].name}から購入金額で購入 -${cost}M`);
       fx(ctx, { t: 'build', p: pi, id, level: c.level, mode: 'acquire', from: prev, cost });
     } else if (mode === 'acquire') {
       const cost = acquireCost(s, id, lv, pi), prev = c.owner, refund = invested(s, id);
@@ -1147,6 +1161,7 @@
   // ---------- ターン終了 ----------
   H.endTurn = (ctx) => {
     const s = ctx.s, B = C().BALANCE, cur = s.players[s.current];
+    s.players.forEach((x) => { delete x.fx.megaCell; }); // なんでも買収で買わなかった時は、ここで権利が消える
     // 手札があふれて自動発動するカード：手番の処理が全部終わったここで、1枚ずつ発動（発動後にまた endTurn に戻る）
     const ai = s.players.findIndex((x) => !x.bankrupt && x.autoCards && x.autoCards.length);
     if (ai >= 0) {
