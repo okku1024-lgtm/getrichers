@@ -1518,22 +1518,12 @@
       }
     }
   }
-  // さだ以外の全員が、その場で1回休み（移動はしない）
-  function sendAllToIsland(ctx, pi) {
-    const s = ctx.s;
-    // まとめて1回の演出で全員1回休み（1人ずつは出さない）
-    const ps = aliveOthers(s, pi).filter((oi) => !summerGuard(ctx, oi));
-    ps.forEach((oi) => { s.players[oi].skip = 1; if (oi === s.current) s.reroll = false; }); // 手番の人はゾロ目の振り直しなし
-    if (!ps.length) return;
-    log(ctx, `📐 ${ps.map((oi) => s.players[oi].name).join('・')}: その場で1回休み`);
-    fx(ctx, { t: 'restAll', ps, by: pi }, true);
-  }
   // さだ「絶対零度」：結果は3通り（確率は CHARACTERS.さだ.skill.outcomes）
-  //   sell：対象の物件をすべて半額で強制売却（代金は対象の所持金に入る）
+  //   sell：対象の物件をすべて強制売却（代金 sellRate 倍は対象の所持金に入る）
   //   zero：対象の所持金を0に
-  //   island：さだ以外の全員がその場で1回休み
+  //   stinori：さだ以外の全員が stinoriPay M をさだに払い、「スチノリハウスに捕まった!!」を手札に加える
   function zettaireido(ctx, pi, ti, skillOf) {
-    // 絶対零度：①強制売却 → ②所持金0 → ③全員を設計課題（1回休み）の順に、それぞれ別々にくじを引く（全部当たりも全部ハズレもある）
+    // 絶対零度：①強制売却 → ②所持金0 → ③スチノリ地獄 の順に、それぞれ別々にくじを引く（全部当たりも全部ハズレもある）
     const s = ctx.s, sk = skillOf ? C().CHARACTERS[skillOf].skill : charOf(s.players[pi]).skill, tp = s.players[ti], o = sk.outcomes;
     const guard = tp.fx.noBankrupt;
     let hits = 0;
@@ -1546,8 +1536,8 @@
         let total = 0;
         props.forEach((id) => { total += Math.floor(invested(s, id) * sk.sellRate); setCell(ctx, id, -1, 0); });
         if (total) addMoney(ctx, ti, total, { noSkill: true });
-        log(ctx, `❄️ ①アタリ！${tp.name}の物件${props.length}件を半額で強制売却（+${total}M）`);
-        banner(ctx, '①強制売却 アタリ！', `${tp.name}の物件${props.length}件を半額で手放させた`, 'skill', pi);
+        log(ctx, `❄️ ①アタリ！${tp.name}の物件${props.length}件を強制売却（+${total}M）`);
+        banner(ctx, '①強制売却 アタリ！', `${tp.name}の物件${props.length}件を手放させた`, 'skill', pi);
       }
     } else { log(ctx, '❄️ ①強制売却…ハズレ'); banner(ctx, '①強制売却 ハズレ…', '', 'bad', pi); }
     // ② 所持金を0に
@@ -1561,13 +1551,18 @@
         banner(ctx, '②凍結 アタリ！', `${tp.name}の所持金が0に`, 'skill', pi);
       }
     } else { log(ctx, '❄️ ②凍結…ハズレ'); banner(ctx, '②凍結 ハズレ…', '', 'bad', pi); }
-    // ③ さだ以外の全員がその場で1回休み
-    if (rand(s) < o.island) {
+    // ③ さだ以外の全員が200Mをさだに払い、「スチノリハウスに捕まった!!」を手札に加える
+    if (rand(s) < o.stinori) {
       hits++;
-      log(ctx, '❄️ ③アタリ！さだ以外の全員がその場で1回休み');
-      banner(ctx, '③全員1回休み アタリ！', 'さだ以外の全員がその場で1回休み', 'skill', pi);
-      sendAllToIsland(ctx, pi);
-    } else { log(ctx, '❄️ ③全員1回休み…ハズレ'); banner(ctx, '③全員1回休み ハズレ…', '', 'bad', pi); }
+      const pay = sk.stinoriPay || 300, card = C().EVENTS.findIndex((e) => e.id === 'stinori');
+      log(ctx, `❄️ ③アタリ！さだ以外の全員が${pay}Mを払い、スチノリ地獄へ🏠`);
+      banner(ctx, '③スチノリ地獄 アタリ！', `全員が${pay}M払って「スチノリハウスに捕まった!!」を手札に`, 'skill', pi);
+      aliveOthers(s, pi).forEach((oi) => {
+        takeMoney(ctx, oi, pi, pay, '絶対零度（スチノリ地獄）');
+        if (card >= 0) addCard(ctx, oi, card, '絶対零度');
+        push(s, { k: 'solvency', p: oi });
+      });
+    } else { log(ctx, '❄️ ③スチノリ地獄…ハズレ'); banner(ctx, '③スチノリ地獄 ハズレ…', '', 'bad', pi); }
     if (hits === 3) banner(ctx, '絶対零度 パーフェクト!!', '3つ全部アタリ', 'gold', pi);
     else if (!hits) banner(ctx, '全部ハズレ…', '絶対零度は不発', 'bad', pi);
   }

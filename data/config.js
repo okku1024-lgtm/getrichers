@@ -137,8 +137,8 @@
     },
     'さだ': {
       color: '#378ADD', img: ASSET + 'char_sada.jpg', pin: ASSET + 'pin_sada.webp', skillImg: ASSET + 'skill_sada_s.png',
-      stats: { plan: 4, equip: 5, struct: 7, mat: 5 },
-      skill: { id: 'zettaireido', title: '絶対零度', desc: '相手1人に3つのくじを順に引く。①10% 物件を半額で強制売却 ②30% 所持金を0に ③60% 自分以外が1回休み', outcomes: { sell: 0.10, zero: 0.30, island: 0.60 }, sellRate: 0.5, gaugeRate: 4.1 },
+      stats: { plan: 4, equip: 4, struct: 7, mat: 3 },
+      skill: { id: 'zettaireido', title: '絶対零度', desc: '相手1人に3つのくじを順に引く。①15% 物件をすべて強制売却（代金は相手へ） ②30% 所持金を0に ③60% さだ以外の全員が300Mをさだに払い「スチノリハウスに捕まった!!」を手札に加える', outcomes: { sell: 0.15, zero: 0.30, stinori: 0.60 }, sellRate: 1.0, stinoriPay: 300, gaugeRate: 4.1 },
     },
     'すぎうら': {
       color: '#E24B4A', img: ASSET + 'char_sugiura.jpg', pin: ASSET + 'pin_sugiura.webp', skillImg: ASSET + 'skill_sugiura_s.png',

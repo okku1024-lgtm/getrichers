@@ -176,7 +176,7 @@
           AU.se('bad'); ACT.sync(D); ACT.react(e.p, 'sad', 'big');
           await FX.banner({ text: '1回休み…', sub: `${D.players[e.p].name}（${e.why}）`, tone: 'bad', face: face(e.p, 'sad'), dur: 1100 });
           break;
-        case 'restAll': // さだ「絶対零度」③：自分以外の全員がまとめて1回休み
+        case 'restAll': // まとめて1回休みの演出（現在は未使用）
           AU.se('bad'); ACT.sync(D); e.ps.forEach((i) => ACT.react(i, 'sad', 'big'));
           await FX.banner({ text: '全員1回休み！', sub: e.ps.map((i) => D.players[i].name).join('・'), tone: 'bad', face: face(e.by, 'happy'), dur: 1400, big: true });
           break;

@@ -277,9 +277,9 @@
       case 'cell': return { type: 'choose', player: pi, value: decideCell(s, pd, rnd) };
       case 'player': {
         if (pd.purpose === 'zettaireido') {
-          // 絶対零度：所持金を0にされた時・物件を半額売却された時の損が一番大きい相手（あの夏の人は無効なので除く）
+          // 絶対零度：所持金を0にされた時・物件を強制売却された時の損が一番大きい相手（あの夏の人は無効なので除く）
           const o = GR.CONFIG.CHARACTERS[(pd.data && pd.data.skillOf) || s.players[pi].char].skill.outcomes;
-          const loss = (i) => s.players[i].fx.noBankrupt ? -1 : (o.zero * Math.max(0, s.players[i].money) + o.sell * 0.5 * R().ownedIds(s, i).reduce((a, id) => a + R().invested(s, id), 0)) * (R().reaches(s, i).length ? 3 : 1); // リーチ中の人を優先して止める
+          const loss = (i) => s.players[i].fx.noBankrupt ? -1 : (o.zero * Math.max(0, s.players[i].money) + o.sell * (1 - ((GR.CONFIG.CHARACTERS[(pd.data && pd.data.skillOf) || s.players[pi].char].skill.sellRate) || 0.5)) * R().ownedIds(s, i).reduce((a, id) => a + R().invested(s, id), 0)) * (R().reaches(s, i).length ? 3 : 1); // リーチ中の人を優先して止める
           return { type: 'choose', player: pi, value: pd.options.slice().sort((a, b) => loss(b) - loss(a))[0] };
         }
         return { type: 'choose', player: pi, value: attackTarget(s, pi, pd.options, rnd) };
