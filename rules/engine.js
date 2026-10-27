@@ -491,7 +491,7 @@
         if (c.owner >= 0 && c.owner !== pi && p.fx.gamerOn && !visit) { gamerNoToll(ctx, pi, c.owner); push(s, ...END); }
         else if (c.owner < 0) push(s, { k: 'offer', p: pi, id: p.pos }, ...END);
         else if (c.owner === pi) push(s, ...END);
-        else if (p.fx.megaBuy && !visit) { megaUse(ctx, pi, p.pos); push(s, { k: 'offer', p: pi, id: p.pos }, ...END); } // なんでも買収：通行料なし・購入金額のみで買える（1周に1回）
+        else if (p.fx.megaBuy && !visit) { megaUse(ctx, pi, p.pos); push(s, { k: 'offer', p: pi, id: p.pos }, ...END); } // なんでも買収：通行料なし・購入金額のみで買える（1周の間ずっと）
         else push(s, { k: 'pay', from: pi, to: c.owner, amount: rentFor(s, p.pos, pi), why: '観光地通行料', rentCell: p.pos }, ...END);
         return;
       case 'prop':
@@ -505,10 +505,9 @@
     }
   };
 
-  // なんでも買収（すぎうら）：1周する間に1回だけ。他人のマス（ランドマーク・観光地も）に止まると通行料なし、購入金額のみで買える
+  // なんでも買収（すぎうら）：1周する間（回数制限なし）。他人のマス（ランドマーク・観光地も）に止まると通行料なし、購入金額のみで買える
   function megaUse(ctx, pi, id) {
     const p = ctx.s.players[pi], c = ctx.s.cells[id];
-    p.fx.megaBuy = false; if (p.fx.lapLeft) delete p.fx.lapLeft.megaBuy;
     p.fx.megaCell = id;
     log(ctx, `🏰 ${p.name}: なんでも買収！${ctx.s.players[c.owner].name}の「${def(id).name}」は通行料なし・購入金額のみで買える`);
     banner(ctx, 'なんでも買収！', '通行料なし・購入金額のみで買える', 'skill', pi);
@@ -1554,7 +1553,7 @@
     // ③ さだ以外の全員が200Mをさだに払い、「スチノリハウスに捕まった!!」を手札に加える
     if (rand(s) < o.stinori) {
       hits++;
-      const pay = sk.stinoriPay || 300, card = C().EVENTS.findIndex((e) => e.id === 'stinori');
+      const pay = sk.stinoriPay || 100, card = C().EVENTS.findIndex((e) => e.id === 'stinori');
       log(ctx, `❄️ ③アタリ！さだ以外の全員が${pay}Mを払い、スチノリ地獄へ🏠`);
       banner(ctx, '③スチノリ地獄 アタリ！', `全員が${pay}M払って「スチノリハウスに捕まった!!」を手札に`, 'skill', pi);
       aliveOthers(s, pi).forEach((oi) => {

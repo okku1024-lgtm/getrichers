@@ -1085,7 +1085,7 @@
     if (p.fx.typhoon) out.push(['🌀', '富の台風18号', `1周する間、通り越した相手から所持金とゲージの${Math.round((E2('typhoon').stealRate || 0) * 100)}%を奪う`]);
     if (p.fx.steady) out.push(['🎯', '狙い通りの目', '1周する間、ゲージで狙った目がそのまま出る']);
     if (p.fx.overtake) out.push(['💰', '追い越し略奪', `1周する間、追い越した相手の所持金${Math.round((K.CHARACTERS['すぎうら'].skill.stealRate || 0) * 100)}%を奪う`]);
-    if (p.fx.megaBuy) out.push(['🏰', 'なんでも買収', '1周する間に1回、他人のマス（ランドマーク・観光地も）で通行料なし・購入金額のみで買える']);
+    if (p.fx.megaBuy) out.push(['🏰', 'なんでも買収', '1周する間、他人のマス（ランドマーク・観光地も）で通行料なし・購入金額のみで買える']);
     if (p.fx.insured) out.push(['🧯', '火災保険', '自分の建物が壊される効果を1回だけ防ぐ']);
     if (p.fx.noBankrupt) out.push(['☀️', 'あの夏は終わらない', '1周する間、支払いがすべて免除']);
     if (p.fx.genjitsuka) out.push(['💰', '具現化スタンバイ', '所持金が尽きたら具現化が発動する']);

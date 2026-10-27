@@ -138,17 +138,17 @@
     'さだ': {
       color: '#378ADD', img: ASSET + 'char_sada.jpg', pin: ASSET + 'pin_sada.webp', skillImg: ASSET + 'skill_sada_s.png',
       stats: { plan: 4, equip: 4, struct: 7, mat: 3 },
-      skill: { id: 'zettaireido', title: '絶対零度', desc: '相手1人に3つのくじを順に引く。①15% 物件をすべて強制売却（代金は相手へ） ②30% 所持金を0に ③60% さだ以外の全員が300Mをさだに払い「スチノリハウスに捕まった!!」を手札に加える', outcomes: { sell: 0.15, zero: 0.30, stinori: 0.60 }, sellRate: 1.0, stinoriPay: 300, gaugeRate: 4.1 },
+      skill: { id: 'zettaireido', title: '絶対零度', desc: '相手1人に3つのくじを順に引く。①15% 物件をすべて強制売却（代金は相手へ） ②30% 所持金を0に ③60% さだ以外の全員が100Mをさだに払い「スチノリハウスに捕まった!!」を手札に加える', outcomes: { sell: 0.15, zero: 0.30, stinori: 0.60 }, sellRate: 1.0, stinoriPay: 100, gaugeRate: 4.1 },
     },
     'すぎうら': {
       color: '#E24B4A', img: ASSET + 'char_sugiura.jpg', pin: ASSET + 'pin_sugiura.webp', skillImg: ASSET + 'skill_sugiura_s.png',
-      stats: { plan: 4, equip: 6, struct: 5, mat: 4 },
-      skill: { id: 'gamer', title: 'ゲーマーの意地', desc: '4つから選ぶ。①3回連続移動（通行料なし）②1周の間 追い越し略奪 ③1周の間 狙い通りの目 ④1周に1回 なんでも買収', moves: 3, stealRate: 0.2, gaugeRate: 2.0,
+      stats: { plan: 4, equip: 6, struct: 3, mat: 3 },
+      skill: { id: 'gamer', title: 'ゲーマーの意地', desc: '4つから選ぶ。①3回連続移動（通行料なし）②1周の間 追い越し略奪 ③1周の間 狙い通りの目 ④1周の間 なんでも買収', moves: 3, stealRate: 0.2, gaugeRate: 2.0,
         choices: [
           { id: 'combo', label: '3回連続移動', icon: '🏃', desc: 'このターン3回続けて動ける。通行料なし' },
           { id: 'steal', label: '追い越し略奪', icon: '💰', desc: '1周する間、追い越した相手の所持金20%を奪う' },
           { id: 'steady', label: '狙い通りの目', icon: '🎯', desc: '1周する間、サイコロのブレなし' },
-          { id: 'mega', label: 'なんでも買収', icon: '🏰', desc: '1周する間に1回、他人のどんなマスでも通行料なし・購入金額のみで買える' },
+          { id: 'mega', label: 'なんでも買収', icon: '🏰', desc: '1周する間、他人のどんなマスでも通行料なし・購入金額のみで買える' },
         ] },
     },
     'おくだ': {
