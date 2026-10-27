@@ -227,6 +227,8 @@
     const s = ctx.s, p = s.players[pi], EV = C().EVENTS;
     const k = p.hand.findIndex((c) => EV[c] && EV[c].id === 'fumine');
     if (k < 0 || loss <= 0) return false;
+    // さこう「具現化」スタンバイ中で、この支払いで所持金が0以下になるなら具現化を優先（ふみねの加護は使わずに残す）
+    if (p.fx.genjitsuka && p.money - loss <= genSk(p).threshold) return false;
     const ev = EV[p.hand[k]], ta = totalAssets(s, pi);
     if (ta <= 0 || loss <= ta * ev.lossFrac) return false;
     p.hand.splice(k, 1);
