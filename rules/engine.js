@@ -574,7 +574,8 @@
   function chargeByAssets(ctx) {
     const now = assetSnap(ctx.s);
     if (ctx.base) ctx.base.forEach((b, i) => {
-      const loss = b - now[i];
+      const loss = b - now[i], q = ctx.s.players[i];
+      if (q.fx.genjitsuka && q.money <= genSk(q).threshold) return; // さこう：具現化が発動する支払いではゲージを溜めない
       if (loss > 0) addSkillCharge(ctx, i, b > 0 ? Math.min(1, loss / b) : 1);
     });
     ctx.base = assetSnap(ctx.s);
@@ -768,6 +769,7 @@
         fx(ctx, { t: 'build', p: pi, id, level: c.level, mode: 'skill' });
       });
       banner(ctx, '具現化 発動！', `支払いキャンセル＋全員から略奪＋${gained}マスを奪取！`, 'skill', pi);
+      ctx.base = assetSnap(s); // 具現化で動いたお金・マスでは、誰のスキルゲージも溜めない
       push(s, { k: 'checkWin', p: pi });
     }
   }
