@@ -132,7 +132,7 @@
   const CHARACTERS = {
     'さこう': {
       color: '#2E9E55', img: ASSET + 'char_sakou.jpg', pin: ASSET + 'pin_sakou.webp', skillImg: ASSET + 'skill_sakou_s.png',
-      stats: { plan: 4, equip: 4, struct: 3, mat: 6 },
+      stats: { plan: 3, equip: 4, struct: 3, mat: 5 },
       skill: { id: 'genjitsuka', title: '具現化', desc: '1周の間スタンバイ。所持金が0以下になったらその支払いを帳消しにし、全員から50%を奪い、建物・観光地のあるマスからランダムに3マスを建物ごと自分のものにする（自分のマスが選ばれることもある）', stealRate: 0.5, takeCells: 3, threshold: 0, gaugeRate: 0.25 },
     },
     'さだ': {
