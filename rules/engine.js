@@ -724,6 +724,8 @@
     if (p.money >= 0) return; // 所持金がちょうど0なら売却は不要（マイナスになった時だけ売却・破産）
     const sellable = ownedIds(s, pi);
     if (!sellable.length) { bankrupt(ctx, pi); return; }
+    // 全部売っても足りない（総資産より支払いが大きい）時は、売却せずにそのまま破産
+    if (p.money + sellable.reduce((a, id) => a + sellPrice(s, id), 0) < 0) { bankrupt(ctx, pi); return; }
     log(ctx, `${p.name}: 所持金不足！資産を売却してください💸`);
     setPending(s, {
       kind: 'sell', player: pi,
