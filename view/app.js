@@ -983,7 +983,7 @@
       if (!cellPick.ids.has(id)) return;
       div.classList.add('quake-target');
       div.style.cursor = 'pointer';
-      if (cellPick.tags && cellPick.tags[id] != null) { const t = el('div', 'sell-tag', `+${cellPick.tags[id].toLocaleString()}M`); div.appendChild(t); } // 売却額をマスの上に表示
+      if (cellPick.tags && cellPick.tags[id] != null && !div.querySelector('.sell-tag')) { const t = el('div', 'sell-tag', `+${cellPick.tags[id].toLocaleString()}M`), nm = div.querySelector('.cname'); if (nm) nm.parentNode.insertBefore(t, nm); else div.appendChild(t); } // 売却額をマス名の上に、マス名と同じ向きで表示
       div.onclick = () => { const cb = cellPick.onPick; endCellSelect(); cb(id); };
     });
   }
