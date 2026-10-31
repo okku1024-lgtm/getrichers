@@ -401,11 +401,9 @@
         let f = (mono ? 2 : 1) * (c.mul > 1 ? c.mul : 1) * (c.wc ? 2 : 1); if (c.sand) f /= 2;
         if (f !== 1) {
           const why = (mono ? '👑' : '') + (c.mul > 1 ? '🔥' : '') + (c.wc ? '🏆' : '') + (c.sand ? '🌪' : '');
-          // マスの外（盤面の内側）に別の要素として浮かせる：四隅の絵や隣のマスに隠れないように
-          const b = el('div', 'rentx-deco' + (f >= 4 ? ' big' : f < 1 ? ' down' : ''), `<span class="rx-why">${why}</span><span class="rx-f">×${f < 1 ? '½' : f}</span>`);
-          const g = 11, at = { bottom: [p.x + p.w / 2, p.y - g], top: [p.x + p.w / 2, p.y + p.h + g], left: [p.x + p.w + g, p.y + p.h / 2], right: [p.x - g, p.y + p.h / 2] }[p.side] || [p.x + p.w / 2, p.y + p.h / 2];
-          b.style.left = at[0] + 'px'; b.style.top = at[1] + 'px';
-          decoQueue.push(b);
+          // マス名のすぐ下に、マス名と同じ向きで表示する
+          const b = el('div', 'rentx-deco in-cell' + (f >= 4 ? ' big' : f < 1 ? ' down' : ''), `<span class="rx-why">${why}</span><span class="rx-f">×${f < 1 ? '½' : f}</span>`);
+          nm.after(b); div.classList.add('has-rx');
         }
       }
       // 四隅の特別なマス：大きく表示して、それぞれの絵を立てる
