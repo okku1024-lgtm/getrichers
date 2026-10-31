@@ -893,21 +893,32 @@
     $('btn-buy-cancel').onclick = () => act({ type: 'choose', player: pd.player, value: 0 });
     $('buy-ov').classList.add('show');
   }
+  // 資産売却：盤面のマスをタップして選ぶ → 売却額と売却後の所持金を確認してから売る
   function openSell(pd) {
-    const p = S.players[pd.player];
-    $('sell-status').innerHTML = `所持金: <b style="color:${p.money < 0 ? '#ffaaaa' : '#4ada80'}">${p.money.toLocaleString()}M</b> — 売却してプラスに戻してください`;
-    const list = $('sell-list'); list.innerHTML = '';
-    pd.options.forEach((o) => {
-      const d = R.def(o.value), c = S.cells[o.value];
-      const col = d.type === 'tourist' ? '#1D9E75' : K.COLOR_HEX[d.color];
+    const p = S.players[pd.player], price = {};
+    pd.options.forEach((o) => (price[o.value] = o.cost));
+    let bar = $('sell-bar');
+    if (!bar) { bar = el('div', '', ''); bar.id = 'sell-bar'; document.body.appendChild(bar); }
+    bar.innerHTML = `<div class="sb-msg">💸 所持金 <b>${p.money.toLocaleString()}M</b>　売却するマスをタップ</div><button class="danger" id="btn-sell-bankrupt" type="button">このまま破産</button>`;
+    bar.classList.add('show');
+    $('btn-sell-bankrupt').onclick = () => {
+      showGen('このまま破産しますか？', '', [
+        { label: 'やめる', fn: () => { closeGen(); } },
+        { label: '破産する', fn: () => { closeGen(); closeSellBar(); endCellSelect(); act({ type: 'choose', player: pd.player, value: 'bankrupt' }); } },
+      ]);
+      $('gen-body').innerHTML = '<span class="card-note">物件はすべて手放し、ゲームオーバーになります</span>';
+    };
+    startCellSelect(pd.options.map((o) => o.value), '💸 売却するマスを選んでください', (id) => {
+      const d = R.def(id), c = S.cells[id], gain = price[id], after = p.money + gain;
       const lv = d.type === 'tourist' ? '観光地' : K.LEVEL_NAMES[c.level];
-      const item = el('div', 'si', `<div class="si-left"><div class="si-dot" style="background:${col}"></div><div><div class="si-name">${d.name}</div><div class="si-lv">${lv}</div></div></div><div class="si-price">+${o.cost.toLocaleString()}M</div>`);
-      item.onclick = () => act({ type: 'choose', player: pd.player, value: o.value });
-      list.appendChild(item);
-    });
-    $('btn-bankrupt').onclick = () => act({ type: 'choose', player: pd.player, value: 'bankrupt' });
-    $('sell-ov').classList.add('show');
+      showGen(`「${d.name}」を売却しますか？`, '', [
+        { label: 'やめる', fn: () => { closeGen(); openSell(pd); } },
+        { label: '売却する', primary: true, fn: () => { closeGen(); closeSellBar(); act({ type: 'choose', player: pd.player, value: id }); } },
+      ]);
+      $('gen-body').innerHTML = `<span class="sell-conf"><span>${lv}</span><span>売却額 <b class="pos">+${gain.toLocaleString()}M</b></span><span>所持金 ${p.money.toLocaleString()}M → <b class="${after < 0 ? 'neg' : 'pos'}">${after.toLocaleString()}M</b></span>${after < 0 ? '<span class="card-note">まだマイナスなので、続けて売却が必要です</span>' : ''}</span>`;
+    }, price);
   }
+  function closeSellBar() { const b = $('sell-bar'); if (b) b.classList.remove('show'); }
   function openTargetSelect(pd) {
     $('travel-title').textContent = pd.title;
     const list = $('tlist'); list.innerHTML = '';
@@ -959,8 +970,8 @@
   }
   // 盤面のマスを直接クリックして選ぶ（地震・世界旅行・ワープ・旅行イベント共通）
   let cellPick = null;
-  function startCellSelect(ids, title, onPick) {
-    cellPick = { ids: new Set(ids), onPick };
+  function startCellSelect(ids, title, onPick, tags) {
+    cellPick = { ids: new Set(ids), onPick, tags };
     $('quake-banner').textContent = title;
     $('quake-banner').classList.add('show');
     markCellTargets();
@@ -972,6 +983,7 @@
       if (!cellPick.ids.has(id)) return;
       div.classList.add('quake-target');
       div.style.cursor = 'pointer';
+      if (cellPick.tags && cellPick.tags[id] != null) { const t = el('div', 'sell-tag', `+${cellPick.tags[id].toLocaleString()}M`); div.appendChild(t); } // 売却額をマスの上に表示
       div.onclick = () => { const cb = cellPick.onPick; endCellSelect(); cb(id); };
     });
   }
