@@ -76,7 +76,7 @@
   // 数字などがポンと出て上に消える
   function pop(x, y, text, cls = 'good', size = 1) {
     const e = mk('fx-pop ' + cls, esc(text));
-    e.style.left = x + 'px'; e.style.top = y + 'px'; e.style.fontSize = 22 * size + 'px';
+    e.style.left = x + 'px'; e.style.top = y + 'px'; e.style.fontSize = 26 * size + 'px';
     e.animate([{ transform: 'translate(-50%,-50%) scale(.3)', opacity: 0 }, { transform: 'translate(-50%,-90%) scale(1.25)', opacity: 1, offset: 0.2 }, { transform: 'translate(-50%,-120%) scale(1)', opacity: 1, offset: 0.8 }, { transform: 'translate(-50%,-170%) scale(.9)', opacity: 0 }], { duration: popDur(), easing: 'ease-out' });
     setTimeout(() => e.remove(), popDur());
   }
