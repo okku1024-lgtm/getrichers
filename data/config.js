@@ -198,7 +198,7 @@
 
   // ---------- チャンスイベント ----------
   const EVENTS = [
-    { id: 'travel', rank: 'gold', desc: 'さだが所持金の30%を払い、自分とさだで好きなマスへ旅行。さだはそこで通行料を払う', name: '完全週休二日制旅行', icon: '🏖️', img: ASSET + 'event_travel.jpg?v=2', victim: 'さだ', costRate: 0.3 },
+    { id: 'travel', rank: 'gold', desc: 'さだが所持金の30%を払い、自分とさだで好きなマスへ旅行', name: '完全週休二日制旅行', icon: '🏖️', img: ASSET + 'event_travel.jpg?v=2', victim: 'さだ', costRate: 0.3 },
     { id: 'glass', rank: 'bronze', desc: '照葉樹林が自分のものになる。おくだが所持金の30%を払う', name: '照葉樹林グラスを破壊', icon: '🥃', img: ASSET + 'event_glass.jpg?v=2', victim: 'おくだ', costRate: 0.3, cellName: '照葉樹林' },
     { id: 'roof', rank: 'bronze', desc: '屋根の色を選ぶ。黒＝所持金が消滅／グレー＝建物がすべて消滅', name: '屋根の色は黒orグレー', icon: '🏚️', img: ASSET + 'event_roof.jpg?v=2' },
     { id: 'typhoon', rank: 'silver', desc: '1周する間、通り越した（同じマスを通った）相手から、所持金とスキルゲージの1/4を奪って自分のものにする', name: '富の台風18号', icon: '🌀', img: ASSET + 'event_typhoon.jpg?v=2', stealRate: 0.25, gaugeRate: 0.25 },

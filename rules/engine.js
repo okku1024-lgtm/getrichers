@@ -1156,13 +1156,6 @@
     const opts = s.cells.filter((c) => ['prop', 'tourist'].includes(def(c.id).type) && c.id !== pos).map((c) => c.id);
     setPending(s, { kind: 'cell', purpose: 'evTravel', player: t.p, options: opts, data: { v: t.v, card: !!t.card }, title: '🏖️ 旅行先を選択してください' });
   };
-  H.evTravelRent = (ctx, t) => {
-    const s = ctx.s, v = s.players[t.v];
-    if (t.v === t.p || v.bankrupt) return;
-    const id = v.pos, c = s.cells[id];
-    if (c.owner >= 0 && c.owner !== t.v) push(s, { k: 'pay', from: t.v, to: c.owner, amount: rentFor(s, id, t.v), why: '通行料', rentCell: id });
-  };
-
   // ---------- ターン終了 ----------
   H.endTurn = (ctx) => {
     const s = ctx.s, B = C().BALANCE, cur = s.players[s.current];
@@ -1458,8 +1451,8 @@
           const vi = pd.data.v;
           log(ctx, `${p.name}: 完全週休二日制旅行 → ${def(v).name}`);
           fx(ctx, { t: 'warp', p: pi, to: v }); if (vi !== pi) fx(ctx, { t: 'warp', p: vi, to: v });
-          if (pd.data.card) push(s, { k: 'walk', p: pi, to: v }, { k: 'walk', p: vi, to: v }, { k: 'evTravelRent', p: pi, v: vi }, { k: 'land', p: pi, visit: true }, { k: 'resumeRoll' });
-          else push(s, { k: 'walk', p: pi, to: v }, { k: 'walk', p: vi, to: v }, { k: 'evTravelRent', p: pi, v: vi }, { k: 'land', p: pi });
+          if (pd.data.card) push(s, { k: 'walk', p: pi, to: v }, { k: 'walk', p: vi, to: v }, { k: 'land', p: pi, visit: true }, { k: 'resumeRoll' }); // さだは旅行先で通行料を払わない
+          else push(s, { k: 'walk', p: pi, to: v }, { k: 'walk', p: vi, to: v }, { k: 'land', p: pi });
         }
         return;
       case 'pickCard': {
