@@ -865,3 +865,8 @@ html,body{overflow-x:hidden}
   .fx-sub{font-size:15px}
   .fx-turn-name{font-size:22px}
 }
+
+/* 友達対戦：通信が不安定な時の小さなお知らせ */
+#net-toast{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-150%);z-index:2500;background:rgba(20,10,30,.92);color:#fff;font-size:13px;font-weight:700;
+  padding:7px 14px;border-radius:999px;border:1px solid rgba(255,200,80,.6);box-shadow:0 4px 14px rgba(0,0,0,.5);transition:transform .25s;pointer-events:none;white-space:nowrap}
+#net-toast.show{transform:translate(-50%,0)}

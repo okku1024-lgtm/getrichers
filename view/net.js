@@ -66,7 +66,7 @@
     const peer = new root.Peer({ debug: 1 });
     let c = null;
     peer.on('open', () => {
-      c = peer.connect(PREFIX + code, { reliable: true });
+      c = peer.connect(PREFIX + code, { reliable: true, serialization: 'json' }); // json の方が軽くて速い
       c.on('open', onOpen);
       c.on('data', onData);
       c.on('close', onClose);
@@ -83,9 +83,11 @@
 
   // ---------- 部屋（ロビー）の管理 ----------
   //   lobby: { code, members: [{ cid, name(=キャラ名 or ''), host, online }] }
+  // 生存確認（ハートビート）：2秒ごとに「生きてるよ」を送り合う。画面が消えた・電波が切れたを早めに見つける
+  const HB_MS = 2000, MEMBER_LOST_MS = 7000, HOST_SLOW_MS = 6000, HOST_LOST_MS = 12000;
   const N = {
     mode: null, code: null, cid: clientId(), seat: -1, seats: {}, lobby: null,
-    _t: null, _conns: {}, handlers: {},
+    _t: null, _conns: {}, handlers: {}, _seen: {}, _hbTimer: null, _lastHost: 0, _hostState: 'ok',
     roomFromUrl: () => (params.get('room') || '').toUpperCase().replace(/[^A-Z0-9]/g, '') || null,
     inviteUrl(code) { const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('room', code); if (useBC) u.searchParams.set('net', 'bc'); return u.toString(); },
     available: () => T.ready(),
@@ -102,13 +104,43 @@
           const cid = Object.keys(N._conns).find((k) => N._conns[k] === conn);
           if (cid) { delete N._conns[cid]; const mb = N.lobby.members.find((x) => x.cid === cid); if (mb) mb.online = false; N.emit('memberLeft', cid); N._sendLobby(); }
         });
-      }, () => onReady && onReady(N.code), (err) => {
+      }, () => { N._startHostHB(); onReady && onReady(N.code); }, (err) => {
         if (err === 'taken') { N._t && N._t.destroy(); N.host(onReady); return; } // 部屋番号がかぶったら作り直す
         N.emit('error', err);
       });
     },
+    _startHostHB() {
+      clearInterval(N._hbTimer);
+      N._hbTimer = setInterval(() => {
+        if (N.mode !== 'host') return;
+        N.broadcast({ t: 'hb' });
+        const now = Date.now();
+        N.lobby.members.forEach((mb) => { if (!mb.host && mb.online && now - (N._seen[mb.cid] || now) > MEMBER_LOST_MS) N._memberOff(mb.cid); });
+      }, HB_MS);
+    },
+    _memberOff(cid) {
+      const mb = N.lobby && N.lobby.members.find((x) => x.cid === cid);
+      if (!mb || !mb.online) return;
+      mb.online = false; N.emit('memberLeft', cid); N._sendLobby();
+    },
+    _memberOn(cid, conn) {
+      const mb = N.lobby && N.lobby.members.find((x) => x.cid === cid);
+      if (!mb || mb.online) return;
+      if (conn) N._conns[cid] = conn;
+      mb.online = true; N._sendLobby(); N.emit('memberJoined', cid, mb.name);
+    },
     _hostRecv(conn, m) {
       if (!m || !m.t) return;
+      if (m.cid) N._seen[m.cid] = Date.now();
+      if (m.t === 'hb' || m.t === 'back') {
+        if (!m.cid) return;
+        N._conns[m.cid] = conn;
+        const mb = N.lobby.members.find((x) => x.cid === m.cid);
+        if (mb && !mb.online) N._memberOn(m.cid, conn);               // 戻ってきた → 人間に戻して盤面を送る
+        else if (mb && m.t === 'back') N.emit('memberJoined', m.cid, mb.name); // 画面を戻した → 念のため盤面を送り直す
+        return;
+      }
+      if (m.t === 'away') { N._memberOff(m.cid); return; } // 画面を消した・アプリを切り替えた
       if (m.t === 'hello') {
         N._conns[m.cid] = conn;
         let mb = N.lobby.members.find((x) => x.cid === m.cid);
@@ -139,15 +171,44 @@
     // 子：部屋に入る
     join(code, onOpen) {
       N.mode = 'client'; N.code = code;
-      N._t = T.join(code, () => { N._t.send({ t: 'hello', cid: N.cid }); onOpen && onOpen(); }, (m) => {
+      N._lastHost = Date.now(); N._hostState = 'ok';
+      N._t = T.join(code, () => { N._lastHost = Date.now(); N._t.send({ t: 'hello', cid: N.cid }); onOpen && onOpen(); }, (m) => {
         if (!m || !m.t) return;
+        N._lastHost = Date.now();
+        if (N._hostState !== 'ok') { N._hostState = 'ok'; N.emit('hostBack'); }
+        if (m.t === 'hb') return;
         if (m.t === 'lobby') { N.lobby = m.lobby; N.emit('lobby', m.lobby); }
         else N.emit(m.t, m);
-      }, () => N.emit('hostLost'), (err) => N.emit('error', err));
+      }, () => N._hostDown(), (err) => N.emit('error', err));
+      clearInterval(N._hbTimer);
+      N._hbTimer = setInterval(() => {
+        if (N.mode !== 'client' || !N._t) return;
+        if (!document.hidden) N._t.send({ t: 'hb', cid: N.cid });
+        const quiet = Date.now() - N._lastHost;
+        if (quiet > HOST_LOST_MS) N._hostDown();
+        else if (quiet > HOST_SLOW_MS && N._hostState === 'ok') { N._hostState = 'slow'; N.emit('hostSlow'); }
+      }, HB_MS);
+    },
+    _hostDown() {
+      if (N.mode !== 'client' || N._hostState === 'lost') return;
+      N._hostState = 'lost'; clearInterval(N._hbTimer);
+      N.emit('hostLost');
+    },
+    // 子：もう一度つなぎ直す（同じ部屋番号・同じID）
+    rejoin(onOpen) {
+      const code = N.code;
+      try { N._t && N._t.destroy(); } catch (e) { /* 無視 */ }
+      N._t = null; N.join(code, onOpen);
     },
     sendAct(action) { if (N.mode === 'client') N._t.send({ t: 'act', cid: N.cid, action }); },
     // 部屋をやめる（親が閉じると、入っていた人には「接続が切れました」と出る）
-    leave() { try { N._t && N._t.destroy(); } catch (e) { /* 無視 */ } N._t = null; N.mode = null; N.code = null; N.lobby = null; N._conns = {}; N.seats = {}; N.seat = -1; },
+    leave() { clearInterval(N._hbTimer); try { N._t && N._t.destroy(); } catch (e) { /* 無視 */ } N._t = null; N.mode = null; N.code = null; N.lobby = null; N._conns = {}; N.seats = {}; N.seat = -1; },
   };
+  // 子：画面を消した・別のアプリに切り替えた → すぐ親に知らせてCPUに代わってもらう。戻ったら「戻った」と知らせる
+  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => {
+    if (N.mode !== 'client' || !N._t || N._hostState === 'lost') return;
+    if (document.hidden) N._t.send({ t: 'away', cid: N.cid });
+    else { N._lastHost = Date.now(); N._t.send({ t: 'back', cid: N.cid }); }
+  });
   GR.net = N;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

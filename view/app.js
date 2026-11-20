@@ -11,7 +11,8 @@
   const SPEEDS = [1, 2, 4];
   let speedIdx = 0;
   try { speedIdx = Math.max(0, SPEEDS.indexOf(Number(localStorage.getItem('gr_speed')) || 1)); } catch (e) { /* 無視 */ }
-  const speed = () => SPEEDS[speedIdx];
+  let turbo = 1; // 友達対戦の子：親より遅れた時だけ演出を早送りして追いつく
+  const speed = () => SPEEDS[speedIdx] * turbo;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms / speed()));
   const LATE_TURN = Math.ceil(K.BALANCE.maxTurns * 0.8); // 終盤戦の開始ターン
   const BS = 480, CR = 60;
@@ -60,8 +61,10 @@
         const m = clientQ.shift();
         hideAllPrompts();
         S = m.state;
+        // 届いた結果がたまっている（親より遅れている）時は、たまっている量に応じて早送り
+        turbo = clientQ.length >= 3 ? 4 : clientQ.length >= 1 ? 2 : 1;
         playing = true;
-        try { await playEffects(m.effects); } finally { playing = false; }
+        try { await playEffects(m.effects); } finally { playing = false; turbo = 1; }
         for (const pi of [...warping]) { warping.delete(pi); ACT.warpIn(pi); }
         D = view(S); renderAll();
       }
@@ -1298,7 +1301,7 @@
   NET.on('memberJoined', (cid) => { // 親：途中で戻ってきた人に今の盤面を送る
     if (!online || !S) return;
     const seat = NET.seats[cid];
-    if (seat != null) { S.players[seat].isHuman = true; addLog(`📶 ${S.players[seat].name}が戻ってきました`); }
+    if (seat != null && !S.players[seat].isHuman && !S.players[seat].bankrupt) { S.players[seat].isHuman = true; addLog(`📶 ${S.players[seat].name}が戻ってきました`); }
     NET.sendTo(cid, { t: 'sync', state: S, seats: NET.seats });
   });
   NET.on('start', (m) => { // 子：ゲーム開始
@@ -1309,15 +1312,48 @@
   });
   NET.on('step', (m) => { clientQ.push(m); pumpClient(); });
   NET.on('sync', (m) => { // 子：途中から入った／戻った
+    const inGame = online && S && !lobbyMode;
     S = m.state; NET.seats = m.seats; NET.seat = m.seats[NET.cid] != null ? m.seats[NET.cid] : -1;
     online = true; lobbyMode = false; $('debug-panel').style.display = 'none';
-    clientQ.length = 0; clientBusy = false;
-    beginGame(false); next();
+    clientQ.length = 0; clientBusy = false; recovering = 0; netToast('');
+    if (inGame && !playing) { D = view(S); ACT.sync(D); renderAll(); next(); } // 遊んでいる途中：盤面だけ差し替える（ログは残す）
+    else if (!inGame) { beginGame(false); next(); }
   });
+  // 子：親の応答が遅い・切れた時
+  NET.on('hostSlow', () => { if (online) netToast('📶 通信が不安定です…'); });
+  NET.on('hostBack', () => { if (online) netToast(''); });
   NET.on('hostLost', () => {
-    showGen('接続が切れました', '部屋を作った人との接続が切れました。部屋を作った人がページを開いたままか確認して、もう一度リンクを開いてください。', [{ label: 'もう一度つなぐ', primary: true, fn: () => location.reload() }]);
+    if (!online || !S) { showGen('接続が切れました', '部屋を作った人との接続が切れました。もう一度リンクを開いてください。', [{ label: 'もう一度つなぐ', primary: true, fn: () => location.reload() }]); return; }
+    tryRecover();
   });
+  // つなぎ直しを2回（約6秒）試す → だめなら、自分以外をCPUにしてこの端末だけで続ける
+  let recovering = 0, recoverTimer = null;
+  function tryRecover() {
+    if (!online || NET.mode !== 'client') return;
+    recovering++;
+    if (recovering > 2) { takeOverLocal(); return; }
+    netToast(`📶 つなぎ直しています…（${recovering}/2）`);
+    NET.rejoin(() => { /* つながったら親から sync が届く */ });
+    clearTimeout(recoverTimer);
+    recoverTimer = setTimeout(() => { if (recovering) tryRecover(); }, 3000);
+  }
+  function takeOverLocal() {
+    clearTimeout(recoverTimer); recovering = 0;
+    const mine = NET.seat;
+    NET.leave(); online = false; clientQ.length = 0; clientBusy = false; turbo = 1;
+    S.players.forEach((p, i) => { p.isHuman = i === mine; });
+    netToast('');
+    addLog('📴 部屋を作った人との通信が切れたので、ほかの人はCPUが代わりに動かします');
+    showGen('通信が切れました', 'ほかのプレイヤーはCPUが代わりに動かして、このまま続けます。', [{ label: 'OK', primary: true, fn: closeGen }]);
+    if (!playing) next();
+  }
+  function netToast(text) {
+    let t = $('net-toast');
+    if (!t) { t = el('div', '', ''); t.id = 'net-toast'; document.body.appendChild(t); }
+    t.textContent = text; t.classList.toggle('show', !!text);
+  }
   NET.on('error', (err) => {
+    if (recovering) return; // つなぎ直し中のエラーは、次の試行に任せる
     const msg = err === 'nohost' ? 'その部屋が見つかりません。部屋を作った人がページを開いているか、リンクが正しいか確認してください。' : `通信でエラーが起きました（${err}）。ページを読み込み直してください。`;
     lobbyStatus(msg);
     if (online) showGen('通信エラー', msg, [{ label: '閉じる', fn: closeGen }]);
