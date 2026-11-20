@@ -42,7 +42,7 @@
     if (r.error) { console.warn('行動エラー:', r.error, action); return; }
     hideAllPrompts(); // 選択画面は送信した瞬間に閉じる（二度押し防止）
     S = r.state;
-    if (online && NET.mode === 'host') NET.broadcast({ t: 'step', state: S, effects: r.effects }); // 結果を全員に配る
+    if (online && NET.mode === 'host') { NET.broadcast({ t: 'step', state: S, effects: r.effects }); saveHost(); } // 結果を全員に配る（ページを読み込み直しても再開できるよう保存）
     playing = true;
     try { await playEffects(r.effects); }
     finally { playing = false; }
@@ -1155,6 +1155,7 @@
 
   // ================= 勝利・開始 =================
   function showWin() {
+    if (NET.mode === 'host') clearHost(); // 決着したら再開用の保存は消す
     const w = S.winner, p = S.players[w.player];
     AU.bgm('win'); FX.confetti(180, 3800); document.body.classList.remove('late');
     let wf = $('win-face');
@@ -1250,6 +1251,7 @@
     }
   }
   function backToLobby() {
+    clearHost();
     online = false; lobbyMode = true;
     $('win-ov').classList.remove('show'); closeGen();
     $('char-select-ov').classList.remove('hide');
@@ -1268,12 +1270,13 @@
     remoteQ.length = 0;
     NET.setPhase('game');
     NET.broadcast({ t: 'start', state: S, seats: NET.seats });
+    saveHost();
     beginGame(true).then(next);
   }
   // 「ひとりで遊ぶ」：作った部屋を閉じて、ひとり用の選択に戻る
   $('btn-mp-solo').onclick = () => {
     if (lobbyMode) {
-      NET.leave(); lobbyMode = false;
+      NET.leave(); lobbyMode = false; clearHost();
       $('mp-invite').hidden = true; $('btn-mp-start').hidden = true; $('mp-members').innerHTML = ''; lobbyStatus('');
       document.querySelectorAll('#char-select-grid .char-card').forEach((c) => c.classList.remove('mp-mine', 'mp-taken'));
     }
@@ -1315,7 +1318,7 @@
     const inGame = online && S && !lobbyMode;
     S = m.state; NET.seats = m.seats; NET.seat = m.seats[NET.cid] != null ? m.seats[NET.cid] : -1;
     online = true; lobbyMode = false; $('debug-panel').style.display = 'none';
-    clientQ.length = 0; clientBusy = false; recovering = 0; netToast('');
+    clientQ.length = 0; clientBusy = false; recovering = 0; clearTimeout(recoverTimer); hostWait(false); netToast('');
     if (inGame && !playing) { D = view(S); ACT.sync(D); renderAll(); next(); } // 遊んでいる途中：盤面だけ差し替える（ログは残す）
     else if (!inGame) { beginGame(false); next(); }
   });
@@ -1326,27 +1329,68 @@
     if (!online || !S) { showGen('接続が切れました', '部屋を作った人との接続が切れました。もう一度リンクを開いてください。', [{ label: 'もう一度つなぐ', primary: true, fn: () => location.reload() }]); return; }
     tryRecover();
   });
-  // つなぎ直しを2回（約6秒）試す → だめなら、自分以外をCPUにしてこの端末だけで続ける
+  // ホストとの接続が切れた：ほかのプレイヤーには「復帰待ち」を出し、5秒ごとにつなぎ直す（ホストが戻るまでゲームは止まったまま）
   let recovering = 0, recoverTimer = null;
   function tryRecover() {
     if (!online || NET.mode !== 'client') return;
     recovering++;
-    if (recovering > 2) { takeOverLocal(); return; }
-    netToast(`📶 つなぎ直しています…（${recovering}/2）`);
-    NET.rejoin(() => { /* つながったら親から sync が届く */ });
+    hostWait(true);
+    NET.rejoin(() => { /* つながったらホストから sync が届く */ });
     clearTimeout(recoverTimer);
-    recoverTimer = setTimeout(() => { if (recovering) tryRecover(); }, 3000);
+    recoverTimer = setTimeout(() => { if (recovering) tryRecover(); }, 5000);
+  }
+  function hostWait(on) {
+    let w = $('host-wait');
+    if (on && !w) {
+      w = el('div', '', `<div class="hw-box"><div class="hw-icon">📡</div><div class="hw-title">ホストとの接続が切れました</div><div class="hw-msg">ホスト（部屋を作った人）の復帰を待っています。<br>ホストがページを開き直すと、自動で再開します。</div><div class="hw-dots"><i></i><i></i><i></i></div><div class="hw-try"></div><button type="button" class="hw-giveup">あきらめて、ほかの人をCPUにして続ける</button></div>`);
+      w.id = 'host-wait'; document.body.appendChild(w);
+      w.querySelector('.hw-giveup').onclick = () => showGen('CPUと続けますか？', 'ホストが戻ってきても、このゲームには合流できなくなります。', [{ label: 'やめる', fn: closeGen }, { label: 'CPUと続ける', primary: true, fn: () => { closeGen(); takeOverLocal(); } }]);
+    }
+    if (w) { w.classList.toggle('show', on); const t = w.querySelector('.hw-try'); if (t) t.textContent = on ? `再接続を試しています（${recovering}回目）` : ''; }
   }
   function takeOverLocal() {
-    clearTimeout(recoverTimer); recovering = 0;
+    clearTimeout(recoverTimer); recovering = 0; hostWait(false);
     const mine = NET.seat;
     NET.leave(); online = false; clientQ.length = 0; clientBusy = false; turbo = 1;
     S.players.forEach((p, i) => { p.isHuman = i === mine; });
     netToast('');
-    addLog('📴 部屋を作った人との通信が切れたので、ほかの人はCPUが代わりに動かします');
-    showGen('通信が切れました', 'ほかのプレイヤーはCPUが代わりに動かして、このまま続けます。', [{ label: 'OK', primary: true, fn: closeGen }]);
+    addLog('📴 ホストとの通信が切れたので、ほかの人はCPUが代わりに動かします');
     if (!playing) next();
   }
+  // ホスト：遊んでいる途中の盤面をこの端末に保存（ページを読み込み直しても、同じ部屋で再開できるように）
+  const HOST_KEY = 'gr_host_session';
+  function saveHost() {
+    if (!(online && NET.mode === 'host' && S)) return;
+    try { localStorage.setItem(HOST_KEY, JSON.stringify({ t: Date.now(), code: NET.code, lobby: NET.lobby, seats: NET.seats, cid: NET.cid, state: S })); } catch (e) { /* 保存できない端末 */ }
+  }
+  function clearHost() { try { localStorage.removeItem(HOST_KEY); } catch (e) { /* 無視 */ } }
+  function loadHost() {
+    try { const h = JSON.parse(localStorage.getItem(HOST_KEY) || 'null'); if (h && Date.now() - h.t < 3 * 3600e3 && h.state && !h.state.winner) return h; } catch (e) { /* 無視 */ }
+    return null;
+  }
+  function offerResume() {
+    const h = loadHost(); if (!h || NET.roomFromUrl()) return;
+    showGen('友達対戦を再開しますか？', `部屋 ${h.code} のゲームが途中で止まっています。再開すると、友達の画面も自動でつながり直します。`, [
+      { label: '再開しない', fn: () => { closeGen(); clearHost(); } },
+      { label: '再開する', primary: true, fn: () => { closeGen(); resumeHost(h); } },
+    ]);
+  }
+  function resumeHost(h) {
+    // 自分（ホスト）の席は今のIDに付け替え。友達は「まだつながっていない」扱いにして、戻るまでCPUが動かす
+    const seats = {};
+    Object.entries(h.seats).forEach(([cid, seat]) => { seats[cid === h.cid ? NET.cid : cid] = seat; });
+    const lobby = h.lobby;
+    lobby.members.forEach((m) => { if (m.cid === h.cid) m.cid = NET.cid; m.online = !!m.host; });
+    lobby.phase = 'game';
+    S = h.state; NET.seats = seats; NET.seat = seats[NET.cid] != null ? seats[NET.cid] : -1;
+    S.players.forEach((p, i) => { if (i !== NET.seat && Object.values(seats).includes(i)) p.isHuman = false; });
+    online = true; lobbyMode = false; debugOn = false; $('debug-panel').style.display = 'none';
+    remoteQ.length = 0;
+    netToast('📡 部屋を開き直しています…');
+    NET.host(() => { netToast(''); addLog(`📡 部屋 ${NET.code} を再開しました。友達がつながり直すまでCPUが代わりに動かします`); saveHost(); }, { code: h.code, lobby });
+    beginGame(false).then(next);
+  }
+  NET.on('hostRetry', (n) => netToast(`📡 部屋を開き直しています…（${n}）`));
   function netToast(text) {
     let t = $('net-toast');
     if (!t) { t = el('div', '', ''); t.id = 'net-toast'; document.body.appendChild(t); }
@@ -1457,7 +1501,7 @@
       setTimeout(() => removeEventListener('click', block, true), 800);
       AU.start();
       ov.classList.add('out');
-      setTimeout(() => ov.remove(), 650);
+      setTimeout(() => { ov.remove(); offerResume(); }, 650); // 途中で止まった友達対戦があれば再開を聞く
     };
     ov.addEventListener('pointerup', go);
     addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'Enter') go(); });

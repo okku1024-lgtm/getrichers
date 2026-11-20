@@ -870,3 +870,17 @@ html,body{overflow-x:hidden}
 #net-toast{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-150%);z-index:2500;background:rgba(20,10,30,.92);color:#fff;font-size:13px;font-weight:700;
   padding:7px 14px;border-radius:999px;border:1px solid rgba(255,200,80,.6);box-shadow:0 4px 14px rgba(0,0,0,.5);transition:transform .25s;pointer-events:none;white-space:nowrap}
 #net-toast.show{transform:translate(-50%,0)}
+
+/* ホストの復帰待ち（招待された側） */
+#host-wait{position:fixed;inset:0;z-index:2400;display:none;align-items:center;justify-content:center;background:rgba(5,3,15,.78);backdrop-filter:blur(3px);padding:16px}
+#host-wait.show{display:flex}
+#host-wait .hw-box{width:min(420px,100%);background:linear-gradient(160deg,#1c1330,#0c0816);border:2px solid rgba(255,200,80,.55);border-radius:16px;padding:22px 18px;text-align:center;color:#fff;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+#host-wait .hw-icon{font-size:40px;animation:ttBlink 1.4s ease-in-out infinite}
+#host-wait .hw-title{font-size:19px;font-weight:900;margin:6px 0 8px}
+#host-wait .hw-msg{font-size:13px;line-height:1.6;color:#d9d0ee}
+#host-wait .hw-dots{display:flex;gap:6px;justify-content:center;margin:14px 0 6px}
+#host-wait .hw-dots i{width:8px;height:8px;border-radius:50%;background:#ffd84f;animation:hwDot 1.2s ease-in-out infinite}
+#host-wait .hw-dots i:nth-child(2){animation-delay:.2s}#host-wait .hw-dots i:nth-child(3){animation-delay:.4s}
+@keyframes hwDot{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+#host-wait .hw-try{font-size:11px;color:#a99cc8;min-height:1em}
+#host-wait .hw-giveup{margin-top:14px;font-size:11px;padding:6px 10px;background:transparent;border:1px solid rgba(255,255,255,.25);color:#bbb;border-radius:8px}

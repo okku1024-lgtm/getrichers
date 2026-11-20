@@ -95,9 +95,10 @@
     emit(ev, ...a) { if (N.handlers[ev]) N.handlers[ev](...a); },
 
     // 親：部屋を作る
-    host(onReady) {
-      N.mode = 'host'; N.code = newCode();
-      N.lobby = { code: N.code, phase: 'lobby', members: [{ cid: N.cid, name: '', host: true, online: true }] };
+    // resume：{ code, lobby } を渡すと、同じ部屋番号で部屋を作り直す（ホストがページを読み込み直した時の復帰用）
+    host(onReady, resume, tries = 0) {
+      N.mode = 'host'; N.code = resume ? resume.code : newCode();
+      N.lobby = resume ? resume.lobby : { code: N.code, phase: 'lobby', members: [{ cid: N.cid, name: '', host: true, online: true }] };
       N._t = T.host(N.code, (conn) => {
         conn.on('data', (m) => N._hostRecv(conn, m));
         conn.on('close', () => {
@@ -105,16 +106,25 @@
           if (cid) { delete N._conns[cid]; const mb = N.lobby.members.find((x) => x.cid === cid); if (mb) mb.online = false; N.emit('memberLeft', cid); N._sendLobby(); }
         });
       }, () => { N._startHostHB(); onReady && onReady(N.code); }, (err) => {
+        if (err === 'taken' && resume) { // 前の接続がまだ残っている：少し待って同じ部屋番号で取り直す
+          N._t && N._t.destroy();
+          if (tries < 30) { N.emit('hostRetry', tries + 1); setTimeout(() => N.host(onReady, resume, tries + 1), 3000); } else N.emit('error', 'taken');
+          return;
+        }
         if (err === 'taken') { N._t && N._t.destroy(); N.host(onReady); return; } // 部屋番号がかぶったら作り直す
         N.emit('error', err);
       });
     },
     _startHostHB() {
       clearInterval(N._hbTimer);
+      let lastTick = Date.now();
       N._hbTimer = setInterval(() => {
         if (N.mode !== 'host') return;
         N.broadcast({ t: 'hb' });
         const now = Date.now();
+        // ホスト自身の画面が消えていた（タイマーが止まっていた）時は、相手が切れたと勘違いしないよう数え直す
+        if (now - lastTick > HB_MS * 2.5) { Object.keys(N._seen).forEach((k) => (N._seen[k] = now)); lastTick = now; return; }
+        lastTick = now;
         N.lobby.members.forEach((mb) => { if (!mb.host && mb.online && now - (N._seen[mb.cid] || now) > MEMBER_LOST_MS) N._memberOff(mb.cid); });
       }, HB_MS);
     },
@@ -206,6 +216,7 @@
   };
   // 子：画面を消した・別のアプリに切り替えた → すぐ親に知らせてCPUに代わってもらう。戻ったら「戻った」と知らせる
   if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => {
+    if (N.mode === 'host' && !document.hidden) { const now = Date.now(); Object.keys(N._seen).forEach((k) => (N._seen[k] = now)); N.broadcast({ t: 'hb' }); return; }
     if (N.mode !== 'client' || !N._t || N._hostState === 'lost') return;
     if (document.hidden) N._t.send({ t: 'away', cid: N.cid });
     else { N._lastHost = Date.now(); N._t.send({ t: 'back', cid: N.cid }); }
