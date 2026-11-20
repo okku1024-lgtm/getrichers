@@ -1285,7 +1285,7 @@
   $('btn-mp-host').onclick = enterHost;
   $('btn-mp-start').onclick = startOnline;
   $('btn-mp-copy').onclick = () => { const i = $('mp-link'); i.select(); try { navigator.clipboard.writeText(i.value); } catch (e) { document.execCommand('copy'); } $('btn-mp-copy').textContent = 'コピーしました'; setTimeout(() => ($('btn-mp-copy').textContent = 'コピー'), 1500); };
-  $('btn-mp-share').onclick = () => { const url = $('mp-link').value; if (navigator.share) navigator.share({ title: 'ゲットリッチ', text: '一緒に遊ぼう！', url }).catch(() => {}); else $('btn-mp-copy').onclick(); };
+  $('btn-mp-share').onclick = () => { const url = $('mp-link').value; if (navigator.share) navigator.share({ title: 'GETRICHERS', text: 'GETRICHERSで一緒に遊ぼう！', url }).catch(() => {}); else $('btn-mp-copy').onclick(); };
   // 通信のできごと
   NET.on('lobby', (lb) => { if (online && lb.phase === 'lobby') backToLobby(); else if (lobbyMode) renderLobby(lb); });
   NET.on('remoteAct', (cid, action) => {

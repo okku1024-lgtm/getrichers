@@ -53,7 +53,7 @@
     p.push(`<g class="bp-title"><rect x="${tx}" y="${ty}" width="${tw}" height="${th}" fill="rgba(10,30,70,.75)" stroke="${LINE}" stroke-width=".8"/>`);
     [10, 20, 30, 40].forEach((r) => p.push(`<line x1="${tx}" y1="${ty + r}" x2="${tx + tw}" y2="${ty + r}" stroke="${LINE}" stroke-width=".35"/>`));
     p.push(`<line x1="${tx + 24}" y1="${ty}" x2="${tx + 24}" y2="${ty + th}" stroke="${LINE}" stroke-width=".35"/>`);
-    const rows = [['工事名', 'ゲットリッチ新築工事'], ['図面名', '配置図'], ['縮尺', '1/500'], ['図番', 'A-01'], ['設計', 'さこう・さだ・すぎうら・おくだ']];
+    const rows = [['工事名', 'GETRICHERS新築工事'], ['図面名', '配置図'], ['縮尺', '1/500'], ['図番', 'A-01'], ['設計', 'さこう・さだ・すぎうら・おくだ']];
     rows.forEach(([k, v], i) => {
       p.push(`<text x="${tx + 3}" y="${ty + 7 + i * 10}" class="bp-t" font-size="4.6">${k}</text>`);
       p.push(`<text x="${tx + 27}" y="${ty + 7 + i * 10}" class="bp-t" font-size="${v.length > 12 ? 4 : 4.8}" font-weight="700">${v}</text>`);
